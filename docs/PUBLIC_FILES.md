@@ -10,7 +10,7 @@
 | `scripts/` | 统一测试入口、字形构建及演示图复现 |
 | `docs/`、`README.md` | 产品、架构、验证范围和 7 张公开演示图 |
 | 配置示例 | 自行填写 AppID、CloudBase 环境 ID |
-| `.github/workflows/` | 无需私人环境的自动检查 |
+| `.github/workflows/` | 自动检查与静态 Demo 发布 |
 
 ## 留在本地的内容
 
@@ -23,13 +23,14 @@
 
 ## 完整清单
 
-以下为首次发布时的 137 个文件。后续维护可能增加或删减
+以下为当前公开版本的 140 个文件。后续维护可能增加或删减
 
 <details>
 <summary>展开逐文件清单</summary>
 
 ```text
 .github/workflows/checks.yml
+.github/workflows/showcase-pages.yml
 .gitignore
 README.md
 cloudfunctions/kitchen/README.md
@@ -146,6 +147,8 @@ project.config.example.json
 scripts/build-menu-glyphs.py
 scripts/showcase/README.md
 scripts/showcase/capture.js
+scripts/showcase/check.js
+scripts/showcase/client.js
 scripts/showcase/generate.js
 scripts/test.js
 tests/cooking-record-flow.js

@@ -42,10 +42,38 @@ complete-menu.png
 
 捕捉脚本在保存前等待绘制完成，并检查横向溢出、图片加载和未替换的模板表达式。它只核对文档页面，不代替小程序业务测试。
 
+截图使用 390 × 844 的逻辑视窗与 3 倍设备像素比，六张页面 PNG 为 1170 × 2532；页面内容独立滚动，底部 Tab 保持可见。完整 Menu 为 1170 × 1596 的整页图，Canvas 本身按 3 倍绘制为 1800 × 2298，再进行截图，并非放大旧 PNG。
+
+## 浏览器交互演示
+
+在仓库根目录生成可发布的静态目录：
+
+```sh
+node scripts/showcase/generate.js --site
+python3 -m http.server 8764 --bind 127.0.0.1
+```
+
+打开 `http://127.0.0.1:8764/output/showcase-site/index.html`。生成目录自带原创食物插画、Tab 图标、字形文件和字体许可，无需连接外部字体服务。
+
+可操作分类筛选、菜名或标签搜索、加减选菜、选菜后查看本地饭单，以及菜单、心愿、记录、我们、吃饭详情与完整 Menu 的页面切换。选择和“演示饭单”只保存在当前浏览器内存，刷新即重置。吃饭详情和完整 Menu 展示固定的虚构历史记录，与刚选择的演示饭单分开，不模拟完成和保存。
+
+登录、照片上传、云端保存、删除、导出和成员管理未在此网页实现；点击相关入口会说明限制，不提示保存成功。真实业务代码仍在小程序和云函数中，浏览器 Demo 不读取、写入或同步 CloudBase 数据。
+
+可用已有 Playwright CLI 复现本轮交互检查：
+
+```sh
+npx --package @playwright/cli playwright-cli --session kitchen-showcase open http://127.0.0.1:8764/output/showcase-site/index.html
+npx --package @playwright/cli playwright-cli --session kitchen-showcase run-code --filename scripts/showcase/check.js
+```
+
+`check.js` 检查分类、搜索与空状态、加减选择、本地饭单、未实现操作提示、Menu 绘制、页面切换和刷新重置。它只验证此文档 Demo，不代表真机或云端验收。
+
+`.github/workflows/showcase-pages.yml` 将同一生成目录发布为 GitHub Pages。它与应用检查工作流分开，不部署小程序或云函数。
+
 结束后关闭 Playwright 会话，并在静态服务终端按 Ctrl+C：
 
 ```sh
 npx --package @playwright/cli playwright-cli --session kitchen-showcase close
 ```
 
-`output/` 和 `.playwright-cli/` 是本地临时产物，不应提交。正式展示只保留七张 PNG、原创 SVG 和复现脚本。
+`output/` 和 `.playwright-cli/` 是本地临时产物，不应提交。仓库保留七张 PNG、原创 SVG、生成与检查脚本；Actions 构建的静态目录用于 Pages 发布。

@@ -3,7 +3,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 const zlib = require('node:zlib')
 const root = path.resolve(__dirname, '../..')
-const out = path.join(root, 'output/playwright/showcase')
+const site = process.argv.includes('--site')
+const out = path.join(root, site ? 'output/showcase-site' : 'output/playwright/showcase')
 const assets = path.join(root, 'docs/assets/food')
 fs.mkdirSync(out, { recursive: true })
 fs.mkdirSync(assets, { recursive: true })
@@ -28,7 +29,7 @@ function food(kind) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><defs><radialGradient id="paper"><stop stop-color="#F6F0E0"/><stop offset="1" stop-color="#E4EADB"/></radialGradient><filter id="shadow"><feGaussianBlur stdDeviation="3"/></filter></defs><rect width="200" height="200" fill="url(#paper)"/><ellipse cx="101" cy="118" rx="73" ry="53" fill="#71816C" opacity=".13" filter="url(#shadow)"/><ellipse cx="100" cy="102" rx="75" ry="61" fill="#FAF7EB" stroke="#CDD5C5" stroke-width="3"/><ellipse cx="100" cy="103" rx="61" ry="47" fill="#F0EBDD"/>${shape}</svg>`
 }
 for (const kind of ['pasta','salmon','salad','soup']) fs.writeFileSync(path.join(assets, `${kind}.svg`), food(kind))
-const url = kind => `../../../docs/assets/food/${kind}.svg`
+const url = kind => `${site ? 'assets/food' : '../../../docs/assets/food'}/${kind}.svg`
 const categories = [{id:'all',name:'全部'},{id:'staple',name:'主食'},{id:'meat',name:'肉肉'},{id:'vegetable',name:'蔬菜'},{id:'soup',name:'汤羹'}]
 const recipes = [
   {id:'demo-r1',name:'番茄意面',category:'主食',metaLabel:'主食 · 简单快手',cookCount:3,coverUrl:url('pasta')},
@@ -92,12 +93,14 @@ function render(nodes,data,templates) {
     if(node.tag==='block'){result+=render(node.children,data,templates);continue}
     const tag=({view:'div',text:'span',image:'img','scroll-view':'div',picker:'div',canvas:'canvas'})[node.tag]||node.tag
     let attrs=''
-    for(const key of ['class','style','src','id','placeholder','value'])if(a[key]!==undefined){
+    for(const key of ['class','style','src','id','placeholder','value',...Object.keys(a).filter(key=>key.startsWith('data-'))])if(a[key]!==undefined){
       if(key==='id'&&tag==='canvas')continue
       attrs+=` ${key}="${escape(interpolate(a[key],data))}"`
     }
     if(tag==='img')attrs+=' alt="原创演示插画"'
-    if(tag==='input')attrs+=' readonly'
+    const action=a.catchtap||a.bindtap||a.bindinput
+    if(action)attrs+=` data-action="${escape(action)}"`
+    if(tag==='input'&&a.bindinput!=='onKeyword')attrs+=' readonly'
     const children=tag==='textarea'?escape(interpolate(a.value||'',data)):render(node.children,data,templates)
     result+=`<${tag}${attrs}>${children}${!['img','input'].includes(tag)?`</${tag}>`:''}`
   }
@@ -110,20 +113,37 @@ function css(file){
     .replace(/(?<![.\w-])page(?=\s*[{,])/g,'body').replace(/(?<![.\w-])image(?=\s|,|\{|\.|:)/g,'img').replace(/(?<![.\w-])view(?=\s|,|\{|\.|:)/g,'div').replace(/(?<![.\w-])text(?=\s|,|\{|\.|:)/g,'span')
 }
 const tabs=[['menu','菜单'],['wishes','心愿'],['records','记录'],['us','我们']]
-const tabbar=active=>`<div class="demo-tabs">${tabs.map(([id,name])=>`<div class="${id===active?'on':''}"><img src="../../../miniprogram/images/tabbar/${id}-${id===active?'selected':'normal'}.png" alt=""/><span>${name}</span></div>`).join('')}</div>`
+const tabbar=active=>`<div class="demo-tabs">${tabs.map(([id,name])=>`<a href="#${id==='us'?'space':id}" class="${id===active?'on':''}"><img src="${site ? 'assets/tabbar' : '../../../miniprogram/images/tabbar'}/${id}-${id===active?'selected':'normal'}.png" alt=""/><span>${name}</span></a>`).join('')}</div>`
 const base=`*{box-sizing:border-box}body{margin:0;width:390px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}button,input,textarea{font:inherit;border:0}button{display:block;background:transparent;cursor:default}input,textarea{outline:0;resize:none}img{object-fit:cover}canvas.export-canvas{display:none}.demo-note{padding:9px 16px;background:#EAEFE6;color:#65785E;text-align:center;font-size:11px;letter-spacing:.2px}.demo-nav{height:55px;display:flex;align-items:center;justify-content:center;position:relative;font-size:16px;font-weight:600}.demo-nav b{position:absolute;left:17px;font-size:26px;font-weight:400}.demo-nav i{position:absolute;right:15px;font-size:22px;font-style:normal;letter-spacing:2px}.demo-tabs{display:flex;padding:13px 0 17px;background:#fff;gap:0}.demo-tabs>div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;color:#82907E}.demo-tabs img{width:28px;height:28px;object-fit:contain}.demo-tabs .on{color:#345443}.page{padding-bottom:25px}.demo-canvas{display:block;width:390px;height:auto}.detail-nav{display:none}`
 for(const demo of demos){
   let body='', script=''
   if(demo.canvas){
     body='<canvas class="demo-canvas" id="menuCanvas"></canvas>'
     const fontSource=read('miniprogram/pages/menu-preview/font.js'),renderSource=read('miniprogram/pages/menu-preview/render.js')
-    script=`<script>const fm={exports:{}};new Function('module',${JSON.stringify(fontSource)})(fm);const rm={exports:{}};new Function('module','require',${JSON.stringify(renderSource)})(rm,()=>fm.exports);(async()=>{const font=fm.exports.parseGlyphs(await(await fetch('glyphs.bin')).arrayBuffer());const menu=${JSON.stringify(menuView)};const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');const layout=rm.exports.layout(ctx,menu,font);canvas.width=600;canvas.height=layout.height;const urls=layout.photos.map(p=>p.url),images=new Map();await Promise.all(urls.map(url=>new Promise(resolve=>{const img=new Image;img.onload=()=>{images.set(url,img);resolve()};img.onerror=resolve;img.src=url})));rm.exports.draw(ctx,menu,layout,images,font);document.body.dataset.ready='true'})()</script>`
+    script=`<script>const fm={exports:{}};new Function('module',${JSON.stringify(fontSource)})(fm);const rm={exports:{}};new Function('module','require',${JSON.stringify(renderSource)})(rm,()=>fm.exports);(async()=>{const font=fm.exports.parseGlyphs(await(await fetch('glyphs.bin')).arrayBuffer());const menu=${JSON.stringify(menuView)};const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');const layout=rm.exports.layout(ctx,menu,font);canvas.width=1800;canvas.height=Math.ceil(layout.height*3);ctx.scale(3,3);const urls=layout.photos.map(p=>p.url),images=new Map();await Promise.all(urls.map(url=>new Promise(resolve=>{const img=new Image;img.onload=()=>{images.set(url,img);resolve()};img.onerror=resolve;img.src=url})));rm.exports.draw(ctx,menu,layout,images,font);document.body.dataset.ready='true'})()</script>`
   }else{
     const nodes=parse(read(`miniprogram/pages/${demo.page}/index.wxml`)),templates={};for(const n of nodes)if(n.tag==='template'&&n.attrs.name)templates[n.attrs.name]=n.children
-    body=`<div class="demo-nav">${!demo.tab?'<b>‹</b>':''}我们的厨房 · ${demo.title}<i>···</i></div>${render(nodes,demo.data,templates)}${demo.tab?tabbar(demo.tab):''}`
+    body=`<div class="demo-nav">${!demo.tab?'<b>‹</b>':''}我们的厨房 · ${demo.title}<i>···</i></div><main class="demo-content">${render(nodes,demo.data,templates)}</main>${demo.tab?tabbar(demo.tab):''}`
     script='<script>Promise.all([...document.images].map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r}))).then(()=>document.body.dataset.ready="true")</script>'
   }
-  fs.writeFileSync(path.join(out,`${demo.id}.html`),`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${demo.title} · 本地演示</title><style>${css('miniprogram/app.wxss')}\n${css(`miniprogram/pages/${demo.page}/index.wxss`)}\n${base}\nbody{display:flex;flex-direction:column;min-height:100vh}.demo-note,.demo-nav,.demo-tabs{flex-shrink:0}.demo-tabs{margin-top:auto}</style></head><body><div class="demo-note">演示数据 · 当前模板本地渲染</div>${body}${script}</body></html>`)
+  fs.writeFileSync(path.join(out,`${demo.id}.html`),`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${demo.title} · 本地演示</title><style>${css('miniprogram/app.wxss')}\n${css(`miniprogram/pages/${demo.page}/index.wxss`)}\n${base}\n${frameCss(demo.canvas)}</style></head><body><div class="demo-note">演示数据 · 当前模板本地渲染</div>${body}${script}</body></html>`)
 }
 fs.writeFileSync(path.join(out,'glyphs.bin'),zlib.brotliDecompressSync(fs.readFileSync(path.join(root,'miniprogram/fonts/kitchen-menu-glyphs.br'))))
-console.log('Generated seven local documentation pages in output/playwright/showcase')
+if(site) buildSite()
+console.log(`Generated ${site ? 'static interactive demo' : 'seven documentation pages'} in ${path.relative(root,out)}`)
+
+function frameCss(canvas=false) {
+  return `body{display:flex;flex-direction:column;${canvas?'min-height:100vh':'height:100vh;overflow:hidden'}}.demo-note,.demo-nav,.demo-tabs{flex-shrink:0}.demo-content{flex:1;min-height:0;overflow-y:auto}.demo-tabs{margin-top:auto}.demo-tabs>a{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;color:#82907E;text-decoration:none}.demo-tabs>a.on{color:#345443}`
+}
+
+function buildSite() {
+  for(const kind of ['food','tabbar'])fs.mkdirSync(path.join(out,'assets',kind),{recursive:true})
+  for(const name of fs.readdirSync(assets))fs.copyFileSync(path.join(assets,name),path.join(out,'assets/food',name))
+  for(const name of fs.readdirSync(path.join(root,'miniprogram/images/tabbar')))fs.copyFileSync(path.join(root,'miniprogram/images/tabbar',name),path.join(out,'assets/tabbar',name))
+  fs.copyFileSync(path.join(root,'miniprogram/fonts/OFL.json'),path.join(out,'OFL.json'))
+  const pages=demos.map(demo=>({...demo,nodes:demo.canvas?[]:parse(read(`miniprogram/pages/${demo.page}/index.wxml`)),css:css(`miniprogram/pages/${demo.page}/index.wxss`)}))
+  const source=`const pages=${JSON.stringify(pages)};const recipes=${JSON.stringify(recipes)};const categories=${JSON.stringify(categories)};const tabs=${JSON.stringify(tabs)};const escape=${escape.toString()};\n${evaluate.toString()}\n${interpolate.toString()}\n${render.toString()}\nconst tabbar=${tabbar.toString().replace("site ? 'assets/tabbar' : '../../../miniprogram/images/tabbar'","'assets/tabbar'")};\n${read('scripts/showcase/client.js')}`
+  fs.writeFileSync(path.join(out,'demo.js'),source)
+  fs.writeFileSync(path.join(out,'font.js'),`const fm={exports:{}};new Function('module',${JSON.stringify(read('miniprogram/pages/menu-preview/font.js'))})(fm);const rm={exports:{}};new Function('module','require',${JSON.stringify(read('miniprogram/pages/menu-preview/render.js'))})(rm,()=>fm.exports);`)
+  fs.writeFileSync(path.join(out,'index.html'),`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>私人厨房 · 交互演示</title><style>${css('miniprogram/app.wxss')}\n${base}\n${frameCss()}\nbody{margin:auto;max-width:100%;height:100dvh}button,[data-action],.category-item{cursor:pointer}.demo-note{font-size:10px}.demo-nav b{cursor:pointer}.demo-content .selection-bottom{position:sticky;bottom:0}.demo-toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);width:310px;max-width:90vw;z-index:110;padding:14px 18px;border-radius:10px;background:#3D5143;color:#FFF;line-height:1.5;font-size:12px;text-align:center}.demo-toast[hidden]{display:none}.demo-links{display:flex;gap:14px;justify-content:center;padding:7px;background:#EEF0E8;font-size:11px;flex-shrink:0}.demo-links a{color:#466653}.demo-nav .back{background:transparent}</style><style id="pageStyle"></style></head><body><div class="demo-note">本地演示 · 虚构数据 · 不连接 CloudBase · 刷新即重置</div><div class="demo-links"><a href="#meal">饭单</a><a href="#meal-detail">吃饭详情</a><a href="#complete-menu">完整 Menu</a></div><div class="demo-nav" id="nav"></div><main class="demo-content" id="content"></main><div id="tabs"></div><div class="demo-toast" id="toast" hidden></div><script src="font.js"></script><script src="demo.js"></script></body></html>`)
+}
