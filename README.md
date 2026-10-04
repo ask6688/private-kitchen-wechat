@@ -9,31 +9,17 @@
 [![Checks](https://github.com/ask6688/private-kitchen-wechat/actions/workflows/checks.yml/badge.svg)](https://github.com/ask6688/private-kitchen-wechat/actions/workflows/checks.yml)
 微信原生小程序 · CloudBase · 双人共享 · Canvas Menu
 
+## 1. 使用场景与闭环
+
+### 今天吃什么，做过什么
+
 | 菜单：挑今天想吃的菜 | 心愿：收下次想试的味道 | 记录：回看做过和吃过的饭 |
 | --- | --- | --- |
 | <a href="docs/assets/screenshots/menu.png"><img src="docs/assets/screenshots/menu.png" width="250" alt="菜单首页演示，点击查看高清图" /></a> | <a href="docs/assets/screenshots/wishes.png"><img src="docs/assets/screenshots/wishes.png" width="250" alt="心愿页演示，点击查看高清图" /></a> | <a href="docs/assets/screenshots/records.png"><img src="docs/assets/screenshots/records.png" width="250" alt="最近记录演示，点击查看高清图" /></a> |
 
 > 展示图与 Demo 使用虚构数据和原创食物插画，复用当前页面模板；Menu 使用项目实际 Canvas 代码。Demo 的选择只保存在浏览器内存，不连接 CloudBase。微信运行与待验证项见 [验证说明](docs/ACCEPTANCE.md)。
 
-## 难点与解决办法
-
-| 遇到的问题 | 处理方式与取舍 |
-| --- | --- |
-| 图片压缩了，云函数请求仍超限 | 排查实际请求后，将 Base64 传图改为授权二进制上传；业务只存 fileId，[压缩与上传](miniprogram/utils/upload.js) 共用一条链路 |
-| 两人同时编辑，后保存覆盖先保存 | 云端成员校验与事务内版本检查；冲突时拒绝覆盖，客户端保留输入，[版本检查](cloudfunctions/kitchen/index.js#L191) |
-| 重复点击、响应丢失，可能重复记一顿饭 | 请求 ID、内容摘要和回执去重；重试复用原结果，同一 ID 的不同内容会被拒绝，[幂等处理](cloudfunctions/kitchen/index.js#L1028) |
-| Menu 分类丢失，改名可能影响历史 | 饭单保存名称和分类快照；旧字段缺失时只补展示映射，优先尊重当时数据，[历史快照](cloudfunctions/kitchen/index.js#L622) |
-| 保存或返回闪过无关页面，输入容易丢 | 复用 [导航工具](miniprogram/utils/navigation.js)，按 [实际页面栈](miniprogram/pages/menu-preview/index.js#L171) 返回；等待时显示目标页加载态，失败保留草稿 |
-| 真机字体未生效，图文间距出现重叠 | Menu 改用本地 [字形轮廓](miniprogram/pages/menu-preview/font.js)；测量和绘制共用 [排版结果](miniprogram/pages/menu-preview/render.js)，减少设备字体差异 |
-
-### 设计思考
-
-- **长期菜谱、这次饭单、历史记忆分开保存**：支持计划开饭，也支持随手补记；修改菜谱不会覆盖过去的一顿饭
-- **把“快”和“写入成功”分开处理**：分类、选菜先即时反馈；云端保存通过校验后才提示成功，网络失败时保留用户输入
-
-回归检查覆盖上传、导航、历史记录、并发冲突和重复请求。当前真机、双账号及弱网验证范围见 [验证清单](docs/ACCEPTANCE.md)
-
-## 从饭单到回忆
+### 从饭单到回忆
 
 同一份饭单接住两个人的选择，完成后留下单菜与整餐的照片、心得，再生成一张完整 Menu
 
@@ -46,7 +32,7 @@
 </tr>
 </table>
 
-## 一个完整的使用闭环
+### 一个完整的使用闭环
 
 ```mermaid
 flowchart LR
@@ -75,7 +61,25 @@ flowchart LR
 
 </details>
 
-## 技术与项目结构
+## 2. 难点与解决办法
+
+| 遇到的问题 | 处理方式与取舍 |
+| --- | --- |
+| 图片压缩了，云函数请求仍超限 | 排查实际请求后，将 Base64 传图改为授权二进制上传；业务只存 fileId，[压缩与上传](miniprogram/utils/upload.js) 共用一条链路 |
+| 两人同时编辑，后保存覆盖先保存 | 云端成员校验与事务内版本检查；冲突时拒绝覆盖，客户端保留输入，[版本检查](cloudfunctions/kitchen/index.js#L191) |
+| 重复点击、响应丢失，可能重复记一顿饭 | 请求 ID、内容摘要和回执去重；重试复用原结果，同一 ID 的不同内容会被拒绝，[幂等处理](cloudfunctions/kitchen/index.js#L1028) |
+| Menu 分类丢失，改名可能影响历史 | 饭单保存名称和分类快照；旧字段缺失时只补展示映射，优先尊重当时数据，[历史快照](cloudfunctions/kitchen/index.js#L622) |
+| 保存或返回闪过无关页面，输入容易丢 | 复用 [导航工具](miniprogram/utils/navigation.js)，按 [实际页面栈](miniprogram/pages/menu-preview/index.js#L171) 返回；等待时显示目标页加载态，失败保留草稿 |
+| 真机字体未生效，图文间距出现重叠 | Menu 改用本地 [字形轮廓](miniprogram/pages/menu-preview/font.js)；测量和绘制共用 [排版结果](miniprogram/pages/menu-preview/render.js)，减少设备字体差异 |
+
+### 设计思考
+
+- **长期菜谱、这次饭单、历史记忆分开保存**：支持计划开饭，也支持随手补记；修改菜谱不会覆盖过去的一顿饭
+- **把“快”和“写入成功”分开处理**：分类、选菜先即时反馈；云端保存通过校验后才提示成功，网络失败时保留用户输入
+
+回归检查覆盖上传、导航、历史记录、并发冲突和重复请求。当前真机、双账号及弱网验证范围见 [验证清单](docs/ACCEPTANCE.md)
+
+## 3. 技术与项目结构
 
 前端使用原生 JavaScript、WXML、WXSS 和 Canvas 2D；后端使用一个 `kitchen` 云函数、CloudBase 文档数据库及私有云存储。核心业务没有额外前端框架。
 
@@ -92,7 +96,7 @@ docs/                      产品、架构、验证说明和公开演示素材
 
 [产品逻辑](docs/PRODUCT.md) · [架构与数据关系](docs/ARCHITECTURE.md) · [后端部署](cloudfunctions/kitchen/README.md) · [公开文件清单](docs/PUBLIC_FILES.md)
 
-## 复制代码后，怎样使用
+## 4. 复制代码后，怎样使用
 
 你会得到完整的小程序前端、云函数、测试和演示素材。配置自己的微信云环境后，可以创建自己的双人厨房；仓库不包含我的厨房数据、账号或环境凭据
 
