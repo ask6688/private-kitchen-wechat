@@ -9,7 +9,7 @@
 [![Checks](https://github.com/ask6688/private-kitchen-wechat/actions/workflows/checks.yml/badge.svg)](https://github.com/ask6688/private-kitchen-wechat/actions/workflows/checks.yml)
 微信原生小程序 · CloudBase · 双人共享 · Canvas Menu
 
-## 1. 使用场景与闭环
+## 1. 使用场景与路径
 
 ### 今天吃什么，做过什么
 
@@ -32,7 +32,7 @@
 </tr>
 </table>
 
-### 一个完整的使用闭环
+### 一个完整的使用路径
 
 ```mermaid
 flowchart LR
@@ -96,7 +96,7 @@ docs/                      产品、架构、验证说明和公开演示素材
 
 [产品逻辑](docs/PRODUCT.md) · [架构与数据关系](docs/ARCHITECTURE.md) · [后端部署](cloudfunctions/kitchen/README.md) · [公开文件清单](docs/PUBLIC_FILES.md)
 
-## 4. 复制代码后，怎样使用
+## 4. 代码实践
 
 你会得到完整的小程序前端、云函数、测试和演示素材。配置自己的微信云环境后，可以创建自己的双人厨房；仓库不包含我的厨房数据、账号或环境凭据
 
