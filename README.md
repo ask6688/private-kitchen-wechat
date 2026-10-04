@@ -37,9 +37,14 @@
 
 同一份饭单接住两个人的选择，完成后留下单菜与整餐的照片、心得，再生成一张完整 Menu
 
-| 饭单：把选择落成安排 | 一起吃饭：留下照片与心得 | 完整 Menu：把这一顿收进回忆 |
-| --- | --- | --- |
-| <a href="docs/assets/screenshots/meal.png"><img src="docs/assets/screenshots/meal.png" width="250" alt="饭单演示，点击查看高清图" /></a> | <a href="docs/assets/screenshots/meal-detail.png"><img src="docs/assets/screenshots/meal-detail.png" width="250" alt="一起吃饭详情演示，点击查看高清图" /></a> | <a href="docs/assets/screenshots/complete-menu.png"><img src="docs/assets/screenshots/complete-menu.png" width="250" alt="由实际Canvas代码生成的完整Menu演示，点击查看高清图" /></a> |
+<table>
+<tr><th>饭单：把选择落成安排</th><th>一起吃饭：留下照片与心得</th><th>完整 Menu：把这一顿收进回忆</th></tr>
+<tr>
+<td valign="top"><a href="docs/assets/screenshots/meal.png"><img src="docs/assets/screenshots/meal.png" width="250" alt="饭单演示，点击查看高清图" /></a></td>
+<td valign="top"><a href="docs/assets/screenshots/meal-detail.png"><img src="docs/assets/screenshots/meal-detail.png" width="250" alt="一起吃饭详情演示，点击查看高清图" /></a></td>
+<td valign="top"><a href="docs/assets/screenshots/complete-menu.png"><img src="docs/assets/screenshots/complete-menu.png" width="250" alt="由实际Canvas代码生成的完整Menu演示，点击查看高清图" /></a></td>
+</tr>
+</table>
 
 ## 一个完整的使用闭环
 
