@@ -1,0 +1,41 @@
+<view wx:if="{{error}}" class="page"><view class="error" bindtap="load">{{error}} · 点此重试</view></view>
+<view wx:elif="{{loading}}" class="page"><view class="empty">正在打开菜品…</view></view>
+<view wx:elif="{{recipe}}" class="recipe-page">
+  <view wx:if="{{recipe.coverFileId}}" class="cover-frame">
+    <image wx:if="{{recipe.coverUrl && !recipe.coverError}}" class="cover" src="{{recipe.coverUrl}}" data-url="{{recipe.coverUrl}}" mode="aspectFill" bindtap="preview" bindload="coverLoaded" binderror="imageError" />
+    <view wx:if="{{recipe.coverError}}" class="cover cover-retry" aria-role="button" bindtap="retryPhotos"><text>照片加载失败</text><text class="hint">{{photosLoading ? '正在重试…' : '点此重试'}}</text></view>
+    <view wx:elif="{{!recipe.coverReady}}" class="cover cover-loading">照片加载中…</view>
+  </view>
+  <view wx:else class="cover cover-empty">🍲</view>
+  <view class="page recipe-body">
+    <view class="eyebrow">{{recipe.category || '未分类'}}</view>
+    <view class="title">{{recipe.name}}</view>
+    <view wx:if="{{recipe.description}}" class="subtitle">{{recipe.description}}</view>
+    <view class="tags"><text class="chip" wx:for="{{recipe.tags}}" wx:key="*this">{{item}}</text></view>
+    <view wx:if="{{recipe.archivedAt}}" class="button-row"><button class="btn" bindtap="restore">恢复菜品</button></view>
+    <view wx:else class="button-row"><button wx:if="{{recipe.available !== false || wishOpen}}" class="btn" bindtap="add">{{selected ? '✓ 已选，点击取消' : '＋ 今天想吃'}}</button><button class="btn-light" bindtap="edit">编辑菜品</button></view>
+    <view wx:if="{{selected}}" class="back-menu" bindtap="menu">{{entryMealId ? '回到这次饭单 →' : '回菜单查看饭单 →'}}</view>
+    <button wx:if="{{wishId && recipe.available === false && !recipe.archivedAt}}" class="btn-text publish" bindtap="publish">收进我们的菜单</button>
+    <view wx:if="{{recipe.externalUrl}}" class="card card-pad external-link"><view class="external-head"><view class="section-title">外部菜谱</view><button class="btn-text" bindtap="copyLink"><text class="copy-icon">⧉</text> 复制链接</button></view><text class="link-text" selectable="{{true}}">{{recipe.externalUrl}}</text><view class="hint">复制后，到对应应用查看</view></view>
+
+    <view wx:if="{{recipe.ingredientsList.length}}" class="section-head"><view class="section-title">准备食材</view></view>
+    <view wx:if="{{recipe.ingredientsList.length}}" class="card card-pad">
+      <view class="detail-line" wx:for="{{recipe.ingredientsList}}" wx:key="index"><text class="dot">•</text><text>{{item}}</text></view>
+    </view>
+    <view wx:if="{{recipe.stepsList.length}}" class="section-head"><view class="section-title">怎么做</view></view>
+    <view wx:if="{{recipe.stepsList.length}}" class="card card-pad">
+      <view class="step-line" wx:for="{{recipe.stepsList}}" wx:key="index"><text class="step-num">{{index + 1}}</text><text>{{item}}</text></view>
+    </view>
+
+    <view class="section-head"><view class="section-title">做过的每一次</view><view class="section-action" bindtap="record">＋ 记一次</view></view>
+    <view wx:if="{{!records.length}}" class="empty">还没记过，下次做时留一笔吧</view>
+    <view wx:else class="stack">
+      <view class="card record-card" wx:for="{{records}}" wx:key="id" data-id="{{item.id}}" bindtap="openRecord">
+        <image wx:if="{{item.photoUrl && !item.photoError}}" class="record-photo" src="{{item.photoUrl}}" data-id="{{item.id}}" data-url="{{item.photoUrl}}" mode="aspectFill" binderror="imageError" />
+        <view wx:elif="{{item.photoFileId}}" class="record-photo photo-retry" aria-role="button" catchtap="retryPhotos">{{photosLoading ? '重试中…' : '照片未加载\n点此重试'}}</view>
+        <view class="record-copy"><view class="hint">{{item.dateLabel}} · {{item.makerName || '厨房伙伴'}}</view><view>{{item.note || '这次也做好啦'}}</view></view>
+      </view>
+    </view>
+    <view wx:if="{{!recipe.archivedAt}}" class="archive" bindtap="archive">归档这道菜</view>
+  </view>
+</view>

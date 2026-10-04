@@ -1,0 +1,30 @@
+<view class="page taxonomy-page">
+  <view class="taxonomy-title">分类与标签</view>
+  <view class="taxonomy-tabs">
+    <button class="taxonomy-tab {{kind === 'category' ? 'active' : ''}}" data-kind="category" bindtap="switchKind">分类</button>
+    <button class="taxonomy-tab {{kind === 'tag' ? 'active' : ''}}" data-kind="tag" bindtap="switchKind">标签</button>
+  </view>
+  <view wx:if="{{error}}" class="error" bindtap="load">{{error}} · 点此重试</view>
+  <view wx:if="{{!loading && !error}}" class="taxonomy-summary"><text>{{items.length}} 个{{label}}</text><button class="taxonomy-add" bindtap="openEditor">＋ 新增{{label}}</button></view>
+  <view wx:if="{{loading}}" class="taxonomy-empty">正在打开…</view>
+  <view wx:elif="{{!error && !items.length}}" class="taxonomy-empty">还没有{{label}}，添加第一个吧</view>
+  <view wx:elif="{{!error}}" class="taxonomy-list">
+    <view class="taxonomy-swipe" wx:for="{{items}}" wx:key="id">
+      <view wx:if="{{openId === item.id}}" class="taxonomy-delete" aria-role="button" aria-label="删除" data-id="{{item.id}}" catchtap="remove">删除</view>
+      <view class="taxonomy-row {{openId === item.id ? 'open' : ''}}" data-id="{{item.id}}" bindtap="rowTap" bindtouchstart="swipeStart" bindtouchend="swipeEnd">
+        <text class="taxonomy-name">{{item.name}}</text>
+        <button class="taxonomy-edit" data-id="{{item.id}}" catchtap="edit">改名</button>
+      </view>
+    </view>
+  </view>
+  <view class="taxonomy-hint">左滑删除，点改名修改</view>
+
+  <view wx:if="{{showEditor}}" class="taxonomy-mask" bindtap="reset">
+    <view class="taxonomy-sheet" catchtap="noop">
+      <view class="taxonomy-sheet-title">{{editingId ? '修改' : '新增'}}{{label}}</view>
+      <input class="taxonomy-input" maxlength="{{kind === 'tag' ? 20 : 24}}" value="{{name}}" placeholder="{{kind === 'tag' ? '例如：微辣、下饭' : '例如：主菜、粉面、甜点'}}" confirm-type="done" bindinput="input" bindconfirm="save" />
+      <button class="btn taxonomy-save" aria-disabled="{{saving || loading}}" bindtap="save">{{saving ? '正在保存…' : (editingId ? '保存名称' : '添加' + label)}}</button>
+      <button wx:if="{{!saving}}" class="taxonomy-cancel" bindtap="reset">取消</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,43 @@
+<view class="page">
+  <view wx:if="{{loading && !space}}" class="empty">正在整理厨房…</view>
+  <view wx:elif="{{error && !space}}" class="error" bindtap="load">{{error}} · 点此重试</view>
+  <block wx:else>
+  <view class="hero"><view class="eyebrow">OUR SPACE</view><view class="title">{{space.name || '私人厨房'}}</view><view class="subtitle">一起做饭，记下我们的味道</view></view>
+  <view wx:if="{{error}}" class="error" bindtap="load">{{error}} · 点此重试</view>
+  <view class="card card-pad space-card">
+    <view class="line space-name-head"><view><view class="hint">厨房名称</view><view class="item-title">{{space.name || '私人厨房'}}</view></view><button wx:if="{{!renaming}}" class="btn-text" bindtap="startRename">改名</button></view>
+    <view wx:if="{{renaming}}" class="rename-form"><input class="input" placeholder="给我们的厨房起个名字" maxlength="40" value="{{renameName}}" disabled="{{savingName}}" bindinput="onRenameName" /><view class="button-row"><button class="btn-light" disabled="{{savingName}}" bindtap="cancelRename">取消</button><button class="btn" disabled="{{!renameReady || savingName}}" bindtap="saveName">保存名称</button></view></view>
+    <view class="divider"></view>
+    <view class="section-title">一起做饭的人</view>
+    <view class="member" wx:for="{{members}}" wx:key="id"><view class="line"><view class="line"><view class="avatar">{{item.role === 'owner' ? '厨' : '伴'}}</view><view><view class="item-title">{{item.displayName || '厨房伙伴'}}</view><view class="hint">{{item.role === 'owner' ? '负责人' : '共同管理者'}}</view></view></view><text class="chip">已加入</text></view><view wx:if="{{member.role === 'owner' && item.role === 'member'}}" class="member-actions"><button class="btn-text" data-id="{{item.id}}" bindtap="transfer">移交负责人</button><button class="btn-text remove" data-id="{{item.id}}" bindtap="remove">移除</button></view></view>
+    <view wx:if="{{space.memberCount < 2 && member.role === 'owner'}}" class="invite-block">
+      <view class="hint">还有一个位置，邀请伙伴一起开饭</view>
+      <button wx:if="{{!invite}}" class="btn invite-btn" bindtap="invite">生成邀请码</button>
+      <view wx:else class="invite-code">
+        <view class="hint">邀请码 · 24 小时内有效，只能用一次</view>
+        <view class="code">{{invite.code}}</view>
+        <view class="button-row"><button class="btn-light" bindtap="copy">复制邀请码</button><button class="btn" open-type="share">发给对方</button></view>
+      </view>
+    </view>
+    <view wx:elif="{{space.memberCount < 2}}" class="hint together">还有一个位置，让负责人邀请伙伴吧</view>
+    <view wx:else class="hint together">两个人到齐啦</view>
+  </view>
+
+  <view class="section-head"><view class="section-title">厨房整理</view></view>
+  <view class="card card-pad taxonomy-entry" bindtap="taxonomy"><view><view class="item-title">分类与标签</view><view class="hint">两个人都可以新增、改名、删除</view></view><text>›</text></view>
+
+  <view class="section-head"><view class="section-title">记录与设置</view></view>
+  <view class="card card-pad data-card">
+    <view class="item-title">带走我们的记录</view>
+    <view class="hint">照片空间 {{space.mediaUsage}}</view>
+    <view class="hint">打包菜谱和记录，也带上照片清单<text class="export-note">JSON 文件不含照片原图，原图请另存</text></view>
+    <button class="btn-light export-btn" bindtap="exportData">导出 JSON</button>
+    <view class="divider"></view>
+    <view wx:if="{{member.role !== 'owner'}}" class="leave" bindtap="leave">退出这间厨房</view>
+    <view wx:elif="{{space.memberCount > 1}}" class="hint">退出前，请先把负责人交给伙伴</view>
+    <view wx:else class="hint">厨房只有你，暂时还不能解散</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="hint loading">正在整理厨房…</view>
+  </block>
+</view>

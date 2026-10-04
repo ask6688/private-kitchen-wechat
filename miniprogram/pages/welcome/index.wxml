@@ -1,0 +1,25 @@
+<view class="page">
+  <view wx:if="{{!loading && !error}}" class="hero welcome-hero">
+    <view class="eyebrow">OUR LITTLE KITCHEN</view>
+    <view class="title">一间只属于你们的厨房</view>
+    <view class="subtitle">收好菜谱，记下一起做饭的日子</view>
+  </view>
+  <view wx:if="{{loading}}" class="empty">正在打开厨房…</view>
+  <view wx:elif="{{error}}" class="error" bindtap="retry">{{error}} · 点此重试</view>
+  <block wx:else>
+    <view class="field"><text class="label">怎么称呼你？</text><input class="input" placeholder="选填，例如：小林" maxlength="24" value="{{displayName}}" bindinput="onDisplayName" /></view>
+    <view class="card card-pad welcome-card">
+      <view class="section-title">创建厨房</view>
+      <view class="hint">起个名字，邀请伙伴一起做饭</view>
+      <view class="field"><input class="input soft-input" placeholder="例如：我们的周末厨房" maxlength="30" value="{{name}}" bindinput="onName" /></view>
+      <button class="btn" bindtap="create">创建私人厨房</button>
+    </view>
+    <view class="or">或者</view>
+    <view class="card card-pad welcome-card">
+      <view class="section-title">加入已有厨房</view>
+      <view class="hint">请伙伴到我们页生成邀请码</view>
+      <view class="field"><input class="input soft-input" placeholder="输入邀请码" maxlength="32" value="{{code}}" bindinput="onCode" /></view>
+      <button class="btn-light" bindtap="join">加入厨房</button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,1 @@
+Page(require('../wishes/page'))

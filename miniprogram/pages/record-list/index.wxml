@@ -1,0 +1,2 @@
+<import src="../records/index.wxml" />
+<include src="../records/index.wxml" />

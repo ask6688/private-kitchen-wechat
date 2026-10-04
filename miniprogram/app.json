@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/menu/index",
+    "pages/welcome/index",
+    "pages/wishes/index",
+    "pages/wish-picker/index",
+    "pages/menu-picker/index",
+    "pages/records/index",
+    "pages/record-list/index",
+    "pages/us/index",
+    "pages/recipe/index",
+    "pages/recipe-edit/index",
+    "pages/taxonomy/index",
+    "pages/meal/index",
+    "pages/record-edit/index",
+    "pages/menu-preview/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F7F4EE",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F7F4EE",
+    "navigationBarTitleText": "私人厨房"
+  },
+  "tabBar": {
+    "color": "#6D7A70",
+    "selectedColor": "#294D3A",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/menu/index",
+        "text": "菜单",
+        "iconPath": "images/tabbar/menu-normal.png",
+        "selectedIconPath": "images/tabbar/menu-selected.png"
+      },
+      {
+        "pagePath": "pages/wishes/index",
+        "text": "心愿",
+        "iconPath": "images/tabbar/wishes-normal.png",
+        "selectedIconPath": "images/tabbar/wishes-selected.png"
+      },
+      {
+        "pagePath": "pages/records/index",
+        "text": "记录",
+        "iconPath": "images/tabbar/records-normal.png",
+        "selectedIconPath": "images/tabbar/records-selected.png"
+      },
+      {
+        "pagePath": "pages/us/index",
+        "text": "我们",
+        "iconPath": "images/tabbar/us-normal.png",
+        "selectedIconPath": "images/tabbar/us-selected.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

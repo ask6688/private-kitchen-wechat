@@ -1,0 +1,85 @@
+<template name="recordPhoto">
+  <view class="photo-tile">
+    <image wx:if="{{photo.url}}" class="record-image" src="{{photo.url}}" mode="aspectFill" lazy-load="true" data-record-key="{{recordKey}}" data-file-id="{{photo.fileId}}" data-url="{{photo.url}}" bindload="photoLoaded" binderror="photoFailed" />
+    <view wx:if="{{photo.state === 'loading'}}" class="photo-state">照片加载中…</view>
+    <view wx:elif="{{photo.state === 'error'}}" class="photo-state photo-retry" aria-role="button" data-record-key="{{recordKey}}" data-file-id="{{photo.fileId}}" catchtap="retryPhoto"><text>照片加载失败</text><text>点此重试</text></view>
+  </view>
+</template>
+<view class="page records-page {{mode === 'all' ? 'records-home' : ''}} {{editing ? 'records-editing' : ''}}">
+  <view wx:if="{{mode === 'cooking' && showRecordMenu}}" class="record-menu-backdrop" catchtap="closeRecordMenu"></view>
+  <view wx:if="{{mode === 'all'}}" class="record-entries">
+    <view class="record-entry" aria-role="button" data-kind="cooking" bindtap="openModule">
+      <view class="entry-top"><view class="entry-icon cooking-icon" aria-hidden="true"><view class="pot-lid"></view><view class="pot-body"></view></view><text class="entry-arrow">›</text></view>
+      <view class="entry-title">做一道菜</view>
+      <view class="entry-description">记录一次下厨</view>
+    </view>
+    <view class="record-entry" aria-role="button" data-kind="meals" bindtap="openModule">
+      <view class="entry-top"><view class="entry-icon dining-icon" aria-hidden="true"><view class="plate-ring"></view><view class="fork-line"></view><view class="spoon-line"></view></view><text class="entry-arrow">›</text></view>
+      <view class="entry-title">一起吃饭</view>
+      <view class="entry-description">记录一顿饭</view>
+    </view>
+  </view>
+  <view wx:if="{{mode}}" class="records-head">
+    <view class="records-title">{{mode === 'all' ? '最近记录' : mode === 'cooking' ? '做一道菜' : '一起吃饭'}}</view>
+    <button wx:if="{{mode === 'all' && (timeline.length || editing)}}" class="record-action" disabled="{{loading || deleting || openingKey}}" bindtap="toggleEditing">{{editing ? '退出编辑' : '编辑'}}</button>
+    <view wx:if="{{mode === 'cooking'}}" class="new-record-entry">
+      <view class="record-action" aria-role="button" aria-expanded="{{showRecordMenu}}" catchtap="newRecord">＋记一次下厨</view>
+      <view wx:if="{{showRecordMenu}}" class="record-methods">
+        <view class="record-method" hover-class="record-method-pressed" hover-start-time="0" hover-stay-time="0" aria-role="button" data-kind="existing" catchtap="chooseRecord"><text>做已有的菜</text><text class="method-arrow">›</text></view>
+        <view class="record-method" hover-class="record-method-pressed" hover-start-time="0" hover-stay-time="0" aria-role="button" data-kind="new" catchtap="chooseRecord"><text>第一次做新菜</text><text class="method-arrow">›</text></view>
+      </view>
+    </view>
+    <view wx:elif="{{mode === 'meals'}}" class="record-action {{loading || starting ? 'is-disabled' : ''}}" aria-role="button" aria-disabled="{{loading || starting}}" bindtap="newMeal">＋ 记录一顿</view>
+  </view>
+  <view wx:if="{{editing}}" class="selection-scope">选择当前显示的 {{timeline.length}} 条记录</view>
+  <view wx:if="{{error}}" class="error" aria-role="button" bindtap="retry">{{error}} · 点此重试</view>
+  <view wx:if="{{!timeline.length && !loading && !error}}" class="empty records-empty">
+    <view class="empty-title">{{mode === 'cooking' ? '还没有做菜记录' : mode === 'meals' ? '还没有吃饭记录' : '还没有记录'}}</view>
+    <view>{{mode === 'cooking' ? '记下这次下厨的味道' : mode === 'meals' ? '安排下一顿，或记下吃过的一餐' : '选一种方式，记下这顿好饭'}}</view>
+  </view>
+  <view class="records-list">
+    <view id="meal-{{item.id}}" class="record-swipe {{editing ? 'is-editing' : ''}} {{editing && item.selected ? 'is-selected' : ''}}" wx:for="{{timeline}}" wx:key="key" data-id="{{item.key}}" bindtouchstart="swipeStart" bindtouchend="swipeEnd">
+      <view wx:if="{{editing}}" class="record-select {{item.selected ? 'is-checked' : ''}}" aria-role="checkbox" aria-checked="{{item.selected}}" aria-label="选择{{item.kind === 'meal' ? item.title : item.name}}" data-key="{{item.key}}" catchtap="selectRecord"><view wx:if="{{item.selected}}" class="selection-tick"></view></view>
+      <view wx:if="{{!editing && openId === item.key}}" class="record-delete" aria-role="button" data-key="{{item.key}}" catchtap="askDelete">删除记录</view>
+      <view class="timeline-item {{item.kind}} {{item.id === highlightMealId ? 'focused-meal' : ''}} {{item.photoCount ? 'has-photo' : 'no-photo'}} {{openId === item.key ? 'is-open' : ''}}" aria-role="button" data-id="{{item.id}}" data-kind="{{item.kind}}" bindtap="open">
+      <view wx:if="{{mode === 'all' && item.photoCount}}" class="record-photo-grid photo-count-{{item.previewPhotos.length}}">
+        <view class="record-photo-cell" wx:for="{{item.previewPhotos}}" wx:for-item="photo" wx:for-index="photoIndex" wx:key="key">
+          <template is="recordPhoto" data="{{photo, recordKey: item.key}}" />
+          <view wx:if="{{item.photoCount > 3 && photoIndex === 2}}" class="photo-more">＋{{item.photoCount - 3}}</view>
+        </view>
+      </view>
+      <block wx:if="{{item.kind === 'record'}}">
+        <view wx:if="{{mode !== 'all' && item.photoCount}}" class="cooking-photo"><template is="recordPhoto" data="{{photo: item.photos[0], recordKey: item.key}}" /></view>
+        <view class="timeline-copy">
+          <view class="record-meta"><block wx:if="{{openingKey === item.key}}">正在打开…</block><block wx:else>{{item.dateLabel}} · {{item.kindLabel}}</block></view>
+          <view class="timeline-title">{{item.name}}</view>
+          <view class="cooking-note">{{item.note || '还没写心得，点开补几句吧'}}</view>
+        </view>
+        <text wx:if="{{!editing}}" class="row-arrow">›</text>
+      </block>
+      <block wx:else>
+        <view class="meal-record-top"><text class="record-meta">{{item.dateLabel}}<text wx:if="{{item.diners}}"> · {{item.diners}} 人</text> · {{item.dishCount}} 道菜</text><text class="record-status {{item.status}}">{{item.statusLabel}}</text></view>
+        <view wx:if="{{item.id === highlightMealId}}" class="confirmed-source">刚确认的这次饭单</view><view class="meal-record-title"><view class="timeline-title">{{item.title}}</view><text wx:if="{{!editing}}" class="row-arrow">›</text></view>
+        <view class="meal-dishes">{{item.dishSummary}}</view>
+        <view wx:if="{{mode !== 'all' && item.photoCount}}" class="meal-photos"><view wx:for="{{item.previewPhotos}}" wx:for-item="photo" wx:key="key" class="meal-record-photo"><template is="recordPhoto" data="{{photo, recordKey: item.key}}" /></view></view>
+      </block>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{loading}}" class="hint records-loading">正在翻看记录…</view>
+  <button wx:elif="{{!error && (mode === 'cooking' && moreRecords || mode === 'meals' && moreMeals)}}" class="record-action load-more" bindtap="more">再看一些</button>
+</view>
+<view wx:if="{{editing}}" class="batch-toolbar">
+  <button class="select-all" disabled="{{loading || deleting || !timeline.length}}" bindtap="selectAll"><view class="selection-circle {{timeline.length && selectedKeys.length === timeline.length ? 'is-checked' : ''}}"><view wx:if="{{timeline.length && selectedKeys.length === timeline.length}}" class="selection-tick"></view></view><text>{{timeline.length && selectedKeys.length === timeline.length ? '取消全选' : '全选'}}</text></button>
+  <view class="batch-count">已选 {{selectedKeys.length}} 条</view>
+  <button class="batch-delete" disabled="{{loading || deleting || !selectedKeys.length}}" bindtap="askBatchDelete">{{deleting ? '正在删除…' : '删除记录'}}</button>
+</view>
+<view wx:if="{{deleteTarget}}" class="record-delete-mask" catchtouchmove="stopDeleteScroll">
+  <view class="record-delete-dialog">
+    <view class="delete-title">{{deleteTarget.kind === 'batch' && deleteTarget.items.length > 1 ? '要和这些记录说再见吗？' : '要和这条记录说再见吗？'}}</view>
+    <view wx:if="{{deleteTarget.kind === 'batch'}}" class="delete-copy">选中的 {{deleteTarget.items.length}} 条记录<text>只删除选中记录，菜品、心愿和其他记录都会留着</text></view>
+    <view wx:else class="delete-copy">{{deleteTarget.kind === 'meal' ? deleteTarget.title : deleteTarget.name}}<text>只删除这条记录，菜品、心愿和其他记录都会留着</text></view>
+    <view wx:if="{{deleteError}}" class="delete-error">{{deleteError}}</view>
+    <view class="delete-actions"><button disabled="{{deleting}}" bindtap="closeDelete">先留着</button><button class="delete-confirm" disabled="{{deleting}}" bindtap="confirmDelete">{{deleting ? '正在删除…' : deleteError ? '重试删除' : '删除记录'}}</button></view>
+  </view>
+</view>

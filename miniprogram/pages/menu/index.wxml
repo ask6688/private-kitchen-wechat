@@ -1,0 +1,77 @@
+<view wx:if="{{!space && loading}}" class="page"><view class="empty">正在打开菜单…</view></view>
+<view wx:elif="{{!space && error}}" class="page"><view class="error" bindtap="refresh">{{error}} · 点此重试</view></view>
+<view wx:else class="page menu-page {{selectedCount || fromMeal ? 'has-selection' : ''}}">
+  <view class="menu-intro">
+    <view class="intro-head"><view class="eyebrow">{{space.name || '私人厨房'}}</view><text class="intro-manage" bindtap="toggleManagement">{{showManagement ? '收起管理' : '管理菜品'}} ›</text></view>
+    <view class="title">{{fromMeal ? '正在为这顿饭选菜' : '今天想吃什么？'}}</view>
+  </view>
+
+  <view wx:if="{{currentMeal}}" class="meal-banner" bindtap="meal">
+    <view class="meal-banner-text">{{currentMeal.title}} · {{currentMeal.items.length}} 道菜 · {{currentMeal.status === 'confirmed' ? '待开饭' : '待确认'}}</view>
+    <view class="meal-banner-arrow">查看 ›</view>
+  </view>
+
+  <view wx:if="{{fromMeal}}" class="hint">{{mealTitle}} · 已选 {{selectedCount}} 道菜</view>
+  <input class="input search" placeholder="搜索菜名或标签" value="{{keyword}}" bindinput="onKeyword" />
+  <view class="menu-heading">
+    <text class="menu-heading-title">{{showArchived ? '归档菜品' : '我们的菜单'}}</text>
+    <text class="menu-heading-action" bindtap="newRecipe">＋ 添加菜品</text>
+  </view>
+  <view wx:if="{{showManagement}}" class="manage-panel">
+    <view class="line"><text class="hint">显示暂不可点的菜</text><switch class="manage-switch" color="#466653" checked="{{showAll}}" bindchange="onShowAll" /></view>
+    <view class="manage-link" bindtap="archived">{{showArchived ? '返回菜单' : '查看归档菜品'}} ›</view>
+  </view>
+
+  <view class="menu-layout">
+    <scroll-view class="category-rail" scroll-y="true" show-scrollbar="false">
+      <view wx:for="{{categories}}" wx:key="id" class="category-item {{categoryId === item.id ? 'active' : ''}}"
+        aria-role="radio" aria-checked="{{categoryId === item.id}}" data-id="{{item.id}}" bindtap="onCategory">{{item.name}}</view>
+    </scroll-view>
+    <view class="menu-dishes">
+      <view wx:if="{{error}}" class="error" bindtap="retry">{{error}} · 点此重试</view>
+      <view wx:elif="{{!shown.length && !loading}}" class="menu-empty">
+        <view class="empty-title">{{showArchived ? '没有归档菜品' : keyword ? '没有找到这道菜' : '这里还没有菜'}}</view>
+        <view>{{showArchived ? '归档的菜会收在这里' : '换个分类看看，或添一道菜'}}</view>
+      </view>
+      <view wx:else class="dish-list">
+        <view class="card dish-card" wx:for="{{shown}}" wx:key="id">
+          <view class="dish-open" data-id="{{item.id}}" bindtap="detail">
+            <image wx:if="{{item.coverUrl && !failedCovers[item.id]}}" class="dish-photo" src="{{item.coverUrl}}" mode="aspectFill" lazy-load="true" data-id="{{item.id}}" binderror="coverError" />
+            <view wx:else class="dish-photo dish-placeholder">待补照片</view>
+            <view class="dish-copy">
+              <view class="dish-name">{{item.name}}</view>
+              <view wx:if="{{item.metaLabel}}" class="dish-meta">{{item.metaLabel}}</view>
+              <view wx:if="{{item.description && !item.metaLabel}}" class="dish-meta">{{item.description}}</view>
+              <view wx:if="{{item.cookCount > 0}}" class="dish-made">做了 {{item.cookCount}} 次</view>
+            </view>
+          </view>
+          <view class="dish-action {{item.archivedAt ? 'archive-action' : ''}}">
+            <button wx:if="{{item.archivedAt}}" class="btn-light btn-small dish-restore" data-id="{{item.id}}" bindtap="restore">恢复</button>
+            <button wx:elif="{{item.available !== false}}" class="dish-select {{item.selected ? 'selected' : ''}}"
+              aria-label="{{item.selected ? '取消选择' : '选这道菜'}}" data-id="{{item.id}}" bindtap="toggleDish"><text class="dish-select-face">{{item.selected ? '−' : '+'}}</text></button>
+            <text wx:else class="muted unavailable">暂不可点</text>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{loading}}" class="hint loading">正在翻看菜单…</view>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedCount || fromMeal}}" class="selection-bottom">
+    <view class="selection-summary" bindtap="toggleSelection">已选 {{selectedCount}} 道 <text wx:if="{{selectedCount}}">⌃</text></view>
+    <button class="btn selection-submit {{!selectedCount || submitting ? 'is-disabled' : ''}}" disabled="{{(!selectedCount && !fromMeal) || submitting}}" bindtap="submit">{{submitting ? '正在同步…' : fromMeal ? '回到这次饭单 →' : '选好了，加入饭单'}}</button>
+  </view>
+
+  <view wx:if="{{showSelection}}" class="selection-mask" bindtap="closeSelection">
+    <view class="selection-sheet" catchtap="noop">
+      <view class="selection-sheet-head"><text>已选 {{selectedCount}} 道菜</text><text bindtap="closeSelection">✕</text></view>
+      <scroll-view scroll-y="true" class="selection-sheet-list">
+        <view wx:for="{{selectedItems}}" wx:key="id" class="selection-sheet-item">
+          <text class="selection-sheet-name">{{item.name}}</text>
+          <text class="selection-remove" data-recipe-id="{{item.recipeId}}" data-wish-id="{{item.wishId}}" bindtap="removeSelected">移除</text>
+        </view>
+      </scroll-view>
+      <view class="selection-sheet-foot"><text wx:if="{{!fromMeal}}" bindtap="clearSelected">清空</text><text bindtap="closeSelection">继续挑选 ›</text></view>
+    </view>
+  </view>
+</view>

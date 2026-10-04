@@ -1,0 +1,35 @@
+# Dependencies and build output
+node_modules/
+coverage/
+output/
+dist/
+build/
+__pycache__/
+*.py[cod]
+
+# Local WeChat / CloudBase configuration
+project.config.json
+project.private.config.json
+miniprogram/config.js
+.env
+.env.*
+!.env.example
+*.local.*
+
+# Credentials and exported private data
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+backups/
+exports/
+
+# Local investigation and validation material
+artifacts/
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+.playwright-cli/

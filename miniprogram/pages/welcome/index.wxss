@@ -1,0 +1,6 @@
+.welcome-hero { padding-top: 90rpx; padding-bottom: 56rpx; }
+.welcome-card { padding: 36rpx; }
+.welcome-card .section-title { margin-bottom: 12rpx; }
+.welcome-card button { width: 100%; }
+.soft-input { background: #F7F4EE; }
+.or { text-align: center; color: #909B90; padding: 28rpx; font-size: 25rpx; }

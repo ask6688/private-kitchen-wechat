@@ -1,0 +1,28 @@
+.space-card { padding: 34rpx; }
+.taxonomy-entry { display: flex; align-items: center; justify-content: space-between; }
+.taxonomy-entry .hint { margin-top: 8rpx; }
+.taxonomy-entry > text { color: #799080; font-size: 44rpx; }
+.space-card .section-title { margin-bottom: 18rpx; }
+.space-name-head .item-title { margin-top: 6rpx; }
+.space-name-head .btn-text { flex: none; width: auto; margin: 0 0 0 auto; padding-right: 0; }
+.rename-form { margin-top: 20rpx; }
+.rename-form .input { background: #F7F4EE; }
+.rename-form .button-row { margin-top: 16rpx; }
+.member { padding: 16rpx 0; }
+.member .line { gap: 18rpx; }
+.avatar { display: flex; align-items: center; justify-content: center; width: 80rpx; height: 80rpx; border-radius: 50%; background: #DFE9DF; color: #466653; font-weight: 700; }
+.member .item-title { font-size: 28rpx; }
+.member .chip { margin: 0; }
+.member-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18rpx; }
+.member-actions .btn-text { width: auto; min-width: 0; margin: 0; padding: 8rpx 0; justify-self: start; }
+.member-actions .remove { color: #A35F50; justify-self: end; }
+.invite-block { border-top: 1rpx solid #EDF0EB; margin-top: 16rpx; padding-top: 28rpx; }
+.invite-btn { margin-top: 22rpx; width: 100%; }
+.invite-code { margin-top: 10rpx; }
+.code { color: #466653; font-size: 36rpx; font-weight: 700; letter-spacing: 2rpx; word-break: break-all; padding: 18rpx 0 24rpx; }
+.together { padding-top: 16rpx; }
+.data-card .item-title { margin-bottom: 12rpx; }
+.export-note { display: block; margin-top: 6rpx; }
+.export-btn { width: 100%; margin-top: 24rpx; }
+.leave { color: #A35F50; text-align: center; font-size: 26rpx; }
+.loading { text-align: center; padding: 20rpx; }

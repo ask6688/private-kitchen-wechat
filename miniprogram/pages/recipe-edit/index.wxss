@@ -1,0 +1,35 @@
+@import "../../styles/cooking-record.wxss";
+.edit-page { padding-bottom: 190rpx; }
+.edit-page .field { width: 100%; }
+.cover-pick { width: 300rpx; height: 240rpx; border-radius: 18rpx; margin-bottom: 12rpx; }
+.cover-empty { display: flex; align-items: center; justify-content: center; background: #E8EDE7; color: #466653; text-align: center; font-size: 26rpx; }
+.field-head { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12rpx; margin-bottom: 8rpx; }
+.field-head .label { margin: 0; flex-shrink: 0; white-space: nowrap; }
+.head-action { display: flex; align-items: center; justify-content: flex-end; flex: 0 0 auto; min-height: 72rpx; font-size: 27rpx; color: #466653; }
+.taxonomy-options { display: flex; flex-wrap: wrap; width: 100%; gap: 12rpx; margin: 8rpx 0 0; }
+.taxonomy-chip { display: flex; align-items: center; justify-content: center; max-width: 100%; min-height: 64rpx; padding: 10rpx 18rpx; border-radius: 8rpx; background: #E8EDE7; color: #506653; font-size: 25rpx; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.taxonomy-chip.selected { background: #466653; color: #FFF; }
+.taxonomy-add { background: #EFF1EB; color: #466653; }
+.taxonomy-input { width: 100%; height: 72rpx; min-height: 72rpx; margin-top: 12rpx; padding: 0 20rpx; border-radius: 8rpx; background: #FFF; color: #292D29; font-size: 27rpx; }
+.taxonomy-note, .taxonomy-caption { width: 100%; margin-top: 12rpx; }
+.link-field { position: relative; width: 100%; background: #FFF; border-radius: 12rpx; }
+.link-input { width: 100%; box-sizing: border-box; padding-right: 112rpx; background: transparent; word-break: break-all; }
+.copy-action { position: absolute; top: 24rpx; right: 24rpx; z-index: 1; display: flex; align-items: center; justify-content: center; width: 80rpx; height: 80rpx; background: transparent; color: #6C7D70; }
+.copy-action.is-disabled { opacity: .4; }
+.copy-icon { position: relative; width: 38rpx; height: 38rpx; }
+.copy-sheet-back, .copy-sheet-front { position: absolute; width: 28rpx; height: 28rpx; border: 3rpx solid currentColor; border-radius: 3rpx; }
+.copy-sheet-back { top: 1rpx; left: 1rpx; }
+.copy-sheet-front { bottom: 1rpx; right: 1rpx; background: #FFF; }
+.link-caption { width: 100%; margin-top: 8rpx; }
+.steps { min-height: 220rpx; }
+.fixed-bottom .btn { width: 100%; }
+.line > view { min-width: 0; flex: 1; }
+.line switch { flex-shrink: 0; }
+
+.cooking-locked { pointer-events: none; }
+.recipe-details-toggle { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; min-height: 88rpx; margin-top: 32rpx; font-size: 29rpx; }
+.recipe-details-toggle > view { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8rpx 16rpx; min-width: 0; }
+.recipe-details-toggle > view text { color: #7A8378; font-size: 24rpx; }
+.details-chevron { flex-shrink: 0; color: #466653; font-size: 25rpx; }
+.cooking-recipe-details { padding: 2rpx 0 18rpx; }
+.cooking-edit .pending-record { color: #8A6541; margin: 16rpx 0; }

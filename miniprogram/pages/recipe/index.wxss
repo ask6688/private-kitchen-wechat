@@ -1,0 +1,27 @@
+.recipe-page { padding-bottom: 40rpx; }
+.cover { width: 100%; height: 520rpx; background: #E3E9DF; }
+.cover-frame { position: relative; width: 100%; height: 520rpx; }
+.cover-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #69736B; font-size: 26rpx; pointer-events: none; }
+.cover-empty { display: flex; justify-content: center; align-items: center; font-size: 120rpx; }
+.cover-retry { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14rpx; color: #69736B; font-size: 28rpx; }
+.photo-retry { display: flex; align-items: center; justify-content: center; padding: 12rpx; background: #E8EDE7; color: #69736B; font-size: 22rpx; line-height: 1.5; white-space: pre-line; text-align: center; }
+.recipe-body { margin-top: -32rpx; background: #F7F4EE; position: relative; border-radius: 32rpx 32rpx 0 0; padding-top: 42rpx; }
+.tags { margin: 24rpx 0; }
+.detail-line, .step-line { display: flex; gap: 18rpx; line-height: 1.6; padding: 12rpx 0; }
+.dot { color: #6E9477; }
+.step-num { display: inline-flex; width: 40rpx; height: 40rpx; flex-shrink: 0; align-items: center; justify-content: center; background: #E8EEE8; border-radius: 50%; color: #466653; font-size: 23rpx; }
+.record-card { display: flex; align-items: stretch; padding: 20rpx; gap: 20rpx; }
+.record-photo { width: 130rpx; height: 130rpx; border-radius: 14rpx; flex-shrink: 0; }
+.record-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 8rpx; }
+.archive { text-align: center; color: #A35F50; font-size: 25rpx; margin-top: 60rpx; }
+.back-menu { padding: 26rpx 0; text-align: center; color: #466653; }
+.publish { margin-top: 20rpx; }
+.external-link { margin-top: 28rpx; }
+.external-head { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.external-head .section-title { min-width: 0; }
+.external-head .btn-text { flex: none; width: auto; margin: 0 0 0 auto; padding-right: 0; white-space: nowrap; }
+.copy-icon { font-size: 30rpx; line-height: 1; }
+.link-text { display: block; color: #667368; font-size: 26rpx; word-break: break-all; line-height: 1.6; margin: 16rpx 0; }
+.external-link .hint { margin-top: 12rpx; }
+.detail-line text:last-child, .step-line text:last-child { min-width: 0; word-break: break-all; }
+.recipe-body .title, .record-copy { word-break: break-all; }

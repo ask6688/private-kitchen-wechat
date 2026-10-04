@@ -1,0 +1,52 @@
+<view class="page edit-page {{mode === 'cooking' ? 'cooking-edit cooking-form' : ''}}">
+  <view wx:if="{{mode === 'cooking'}}" class="cooking-heading">第一次做新菜</view>
+  <view wx:else class="hero"><view class="eyebrow">{{mode === 'wish' ? 'WISH LIST' : 'OUR MENU'}}</view><view class="title">{{mode === 'wish' ? (wishId ? '编辑想吃的菜' : '添加想吃的菜') : (id ? '编辑这道菜' : '添加一道菜')}}</view><view class="subtitle">先记菜名，照片和做法慢慢补</view></view>
+  <view wx:if="{{error}}" class="error" bindtap="retryLoad">{{error}} · 点此重试</view>
+  <view wx:if="{{draftVersionChanged}}" class="error">菜品有新修改，草稿已保留，保存时会核对</view>
+  <view wx:if="{{pendingRecordPayload && !saving}}" class="hint pending-record">保存结果待确认，请点核对并重试</view>
+  <view wx:if="{{loading}}" class="empty">正在打开…</view>
+  <block wx:elif="{{!error}}">
+    <view class="{{mode === 'cooking' && (saving || pendingRecordPayload || savedRecordId) ? 'cooking-locked' : ''}}">
+    <view wx:if="{{mode !== 'cooking'}}" class="field"><text class="label">菜品照片</text><image wx:if="{{coverUrl}}" class="cover-pick" src="{{coverUrl}}" mode="aspectFill" bindtap="photo" /><view wx:else class="cover-pick cover-empty" bindtap="photo">＋ 添加照片</view><view class="hint">{{coverUrl ? '点照片更换，保存时上传' : '选好照片，保存时上传'}}</view></view>
+    <view class="field name-field"><text class="label">菜名 *</text><input class="input name-control" placeholder="例如：越南粉" maxlength="80" value="{{name}}" data-field="name" bindinput="change" /></view>
+    <block wx:if="{{mode === 'cooking'}}">
+      <view class="field photo-field"><text class="label">这次的照片</text><view class="photo-grid">
+        <view class="photo-item" wx:for="{{photos}}" wx:key="key">
+          <image wx:if="{{item.url && item.state !== 'error'}}" class="photo-preview" src="{{item.url}}" data-key="{{item.key}}" data-url="{{item.url}}" bindload="photoLoaded" binderror="photoFailed" bindtap="previewPhoto" mode="aspectFill" />
+          <view wx:if="{{item.state === 'loading'}}" class="photo-state">加载中…</view>
+          <view wx:elif="{{item.state === 'error'}}" class="photo-state photo-error" aria-role="button" data-key="{{item.key}}" catchtap="retryPhoto">{{item.fileId ? '加载失败' : '照片已失效'}}<text>{{item.fileId ? '点此重试' : '请移除后重选'}}</text></view>
+          <view class="photo-remove" aria-role="button" aria-label="移除照片" data-index="{{index}}" catchtap="removePhoto"><text>×</text></view>
+        </view>
+        <view class="photo-add" aria-role="button" bindtap="photo"><view class="photo-add-content"><text class="photo-add-icon">＋</text><text>添加照片</text></view></view>
+      </view><view class="hint">保存时上传，之后也能补照片</view></view>
+      <view class="field date-field"><text class="label">日期</text><picker mode="date" value="{{date}}" data-field="date" bindchange="change"><view class="date-value">{{date}}<text>⌄</text></view></picker></view>
+      <view class="field"><text class="label">这次的心得</text><textarea class="textarea cooking-note" placeholder="比如火候、味道、一起做饭时的小事…" maxlength="4000" value="{{note}}" data-field="note" bindinput="change" /></view>
+      <view class="recipe-details-toggle" aria-role="button" aria-expanded="{{recipeDetailsOpen}}" bindtap="toggleRecipeDetails"><view>菜谱信息<text>分类、标签与做法</text></view><text class="details-chevron">{{recipeDetailsOpen ? '收起 ⌃' : '展开 ⌄'}}</text></view>
+    </block>
+    <view hidden="{{mode === 'cooking' && !recipeDetailsOpen}}" class="{{mode === 'cooking' ? 'cooking-recipe-details' : ''}}">
+    <view class="field">
+      <view class="field-head"><text class="label">分类</text><view class="head-action" aria-role="button" data-kind="category" bindtap="manage">管理分类</view></view>
+      <view class="taxonomy-options"><view wx:for="{{categories}}" wx:key="id" class="taxonomy-chip {{selectedCategoryId === item.id ? 'selected' : ''}}" aria-role="radio" aria-checked="{{selectedCategoryId === item.id}}" data-id="{{item.id}}" bindtap="selectCategory">{{item.name}}</view><view wx:if="{{editingTaxonomy !== 'category'}}" class="taxonomy-chip taxonomy-add" aria-role="button" data-kind="category" bindtap="openTaxonomyInput">＋ 自定义</view></view>
+      <input wx:if="{{editingTaxonomy === 'category'}}" class="taxonomy-input" placeholder="输入分类名称" maxlength="24" confirm-type="done" focus="{{taxonomyFocus}}" value="{{categoryQuery}}" data-kind="category" bindinput="categoryInput" bindblur="taxonomyBlur" bindconfirm="categoryConfirm" />
+      <view wx:if="{{pendingCategoryName}}" class="hint taxonomy-note">草稿分类 {{pendingCategoryName}} 已删除，请重选或添加</view>
+      <view wx:if="{{categoryMissing}}" class="hint taxonomy-note">原分类已删除，请重选或<text class="head-action" aria-role="button" bindtap="clearCategory">设为未分类</text></view>
+    </view>
+    <view class="field">
+      <view class="field-head"><text class="label">标签</text><view class="head-action" aria-role="button" data-kind="tag" bindtap="manage">管理标签</view></view>
+      <view class="taxonomy-options"><view wx:for="{{tags}}" wx:key="id" class="taxonomy-chip {{item.selected ? 'selected' : ''}}" aria-role="checkbox" aria-checked="{{item.selected}}" data-id="{{item.id}}" bindtap="tag">{{item.name}}</view><view wx:if="{{editingTaxonomy !== 'tag'}}" class="taxonomy-chip taxonomy-add" aria-role="button" data-kind="tag" bindtap="openTaxonomyInput">＋ 自定义</view></view>
+      <input wx:if="{{editingTaxonomy === 'tag'}}" class="taxonomy-input" placeholder="输入标签名称" maxlength="20" confirm-type="done" focus="{{taxonomyFocus}}" value="{{tagQuery}}" data-kind="tag" bindinput="tagInput" bindblur="taxonomyBlur" bindconfirm="tagConfirm" />
+      <view wx:if="{{legacyTags.length && !tagsTouched}}" class="hint taxonomy-note">原有标签：{{legacyTagsText}}，选新标签后会替换</view>
+      <view wx:if="{{pendingTagNames.length}}" class="hint taxonomy-note">草稿标签 {{pendingTagsText}} 已删除，请重选或添加</view>
+      <view class="hint taxonomy-caption">最多选 8 个</view>
+    </view>
+    <view wx:if="{{showDescription}}" class="field"><text class="label">原有介绍</text><textarea class="textarea" auto-height="{{true}}" placeholder="这段介绍会继续保留，也可以修改" maxlength="500" value="{{description}}" data-field="description" bindinput="change" /></view>
+    <view class="field"><text class="label">外部链接</text><view class="link-field"><textarea class="textarea link-input" auto-height="{{true}}" placeholder="粘贴菜谱链接或分享文字" maxlength="4000" value="{{externalUrl}}" data-field="externalUrl" bindinput="change" /><view class="copy-action {{externalUrl ? '' : 'is-disabled'}}" aria-role="button" aria-label="复制链接" aria-disabled="{{!externalUrl}}" bindtap="copyLink"><view class="copy-icon"><view class="copy-sheet-back"></view><view class="copy-sheet-front"></view></view></view></view><view class="hint link-caption">支持小红书等菜谱分享内容</view></view>
+    <view class="field"><text class="label">准备食材</text><textarea class="textarea" auto-height="{{true}}" placeholder="每行写一种食材，可留空" maxlength="4000" value="{{ingredientsText}}" data-field="ingredientsText" bindinput="change" /></view>
+    <view class="field"><text class="label">制作步骤</text><textarea class="textarea steps" auto-height="{{true}}" placeholder="每行写一步，可留空" maxlength="8000" value="{{stepsText}}" data-field="stepsText" bindinput="change" /></view>
+    </view>
+    <view wx:if="{{mode === 'cooking'}}" class="card card-pad line cooking-option"><view><view class="label">同时加入我们的菜单</view><view class="hint">{{addToMenu ? '下次还能从菜单里选' : '只记下这次下厨'}}</view></view><switch checked="{{addToMenu}}" color="#466653" bindchange="onAddToMenu" /></view>
+    <view wx:else class="card card-pad line"><view><view class="label">出现在菜单中</view><view class="hint">{{mode === 'wish' ? '想试做的菜先留在心愿单' : '关闭后，仍能编辑和查看记录'}}</view></view><switch checked="{{available}}" color="#466653" bindchange="available" /></view>
+    </view>
+  </block>
+  <view class="fixed-bottom"><button class="btn" disabled="{{saving || taxonomySaving || loading || !!error || !!archivedAt}}" loading="{{saving}}" bindtap="save">{{archivedAt ? '请先恢复菜品' : (mode === 'cooking' ? (savedRecordId ? '查看已保存记录' : (pendingRecordPayload && !saving ? '核对并重试' : '保存记录')) : (mode === 'wish' ? '保存心愿' : '保存菜品'))}}</button></view>
+</view>

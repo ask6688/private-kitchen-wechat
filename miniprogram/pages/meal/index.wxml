@@ -1,0 +1,82 @@
+<view class="page meal-page">
+  <view wx:if="{{!loading && loadReady}}" class="meal-heading"><text class="meal-heading-title">{{pageTitle}}</text><text wx:if="{{meal}}" class="meal-status">{{status === 'draft' ? '待确认' : status === 'confirmed' ? '待开饭' : status === 'completed' ? '已完成' : '已取消'}}</text></view>
+  <view wx:if="{{successNote}}" class="success-note">{{successNote}}</view>
+  <view wx:if="{{error}}" class="error" bindtap="retry">{{error}} · 点此重试</view>
+  <view wx:if="{{!recordMode && pendingMealPayload && (status === 'completed' || status === 'cancelled')}}" class="success-note" bindtap="retryPendingMeal">上次保存结果待核对 · 点此核对</view>
+  <view wx:if="{{loading}}" class="empty">{{recordMode ? '正在打开记录…' : '正在打开饭单…'}}</view>
+  <block wx:elif="{{loadReady}}">
+    <view class="section-head"><view class="section-title">{{recordMode ? '这顿饭' : '这顿饭的安排'}}</view></view>
+    <view class="meal-plan">
+      <view class="field meal-name"><text class="label">名称</text><input class="input soft-input" maxlength="80" value="{{title}}" disabled="{{(!recordMode && status !== 'draft') || saving || pendingEatingPayload || pendingMealPayload}}" bindinput="onTitle" /></view>
+      <view class="form-row"><view class="field date-field"><text class="label">日期</text><picker mode="date" value="{{date}}" disabled="{{(!recordMode && status !== 'draft') || saving || pendingEatingPayload || pendingMealPayload}}" bindchange="onDate"><view class="input soft-input date-input">{{date}}</view></picker></view><view class="field diner-field"><text class="label">人数</text><input class="input soft-input" type="number" maxlength="2" value="{{diners}}" disabled="{{(!recordMode && status !== 'draft') || saving || pendingEatingPayload || pendingMealPayload}}" bindinput="onDiners" /></view></view>
+      <view wx:if="{{!recordMode || note}}" class="field meal-note"><text class="label">安排备注</text><textarea class="textarea soft-input" auto-height placeholder="这顿饭有什么特别安排？" maxlength="1000" value="{{note}}" disabled="{{(!recordMode && status !== 'draft') || saving || pendingEatingPayload || pendingMealPayload}}" bindinput="onNote" /></view>
+    </view>
+
+    <view wx:if="{{status === 'completed' || photos.length || memoryDirty}}" class="meal-album">
+      <view class="section-head"><view class="section-title">这顿饭的照片</view></view>
+      <view class="album-grid">
+        <view class="album-photo" wx:for="{{photos}}" wx:key="key">
+          <image wx:if="{{item.url && item.state !== 'error'}}" src="{{item.url}}" mode="aspectFill" data-key="{{item.key}}" data-url="{{item.url}}" bindtap="previewPhoto" bindload="photoLoaded" binderror="photoFailed" />
+          <view wx:if="{{item.state === 'loading'}}" class="album-photo-retry album-loading">照片加载中…</view>
+          <view wx:elif="{{item.state === 'error'}}" class="album-photo-retry" aria-role="button" data-key="{{item.key}}" catchtap="retryPhoto"><text>{{item.fileId ? '照片加载失败' : '照片已失效'}}</text><text>{{item.fileId ? '点此重试' : '请移除后重选'}}</text></view>
+          <view wx:if="{{status === 'completed' && !memorySaving && !pendingMemoryPayload && !saving && !pendingEatingPayload}}" class="album-photo-remove" aria-role="button" aria-label="移除照片" data-index="{{index}}" catchtap="removeAlbumPhoto"><text>×</text></view>
+        </view>
+        <view wx:if="{{status === 'completed' && photos.length < 12 && !memorySaving && !pendingMemoryPayload && !saving && !pendingEatingPayload}}" class="album-photo album-photo-add" aria-role="button" bindtap="addAlbumPhoto"><view><text class="album-add-icon">＋</text><text>添加照片</text></view></view>
+      </view>
+      <view wx:if="{{status === 'completed' || memoryDirty}}" class="meal-memory-note"><text class="label">这顿的心得</text><textarea class="textarea soft-input" placeholder="这顿饭有什么想记下的？" maxlength="4000" value="{{reflection}}" disabled="{{memorySaving || saving || pendingEatingPayload || pendingMemoryPayload || status !== 'completed'}}" bindinput="onReflection" /></view>
+      <view wx:elif="{{reflection}}" class="meal-memory-note"><text class="label">这顿的心得</text><view class="meal-memory-text">{{reflection}}</view></view>
+      <view wx:if="{{memoryNotice}}" class="memory-notice">{{memoryNotice}}</view>
+      <view wx:if="{{memoryConflictPhotos}}" class="memory-conflict">
+        <view>照片有不同修改 · 已保存 {{memoryRemotePhotoCount}} 张 / 本页 {{photos.length}} 张</view>
+        <view class="memory-conflict-actions"><text bindtap="previewMemoryRemote">查看已保存照片</text><text data-field="photoFileIds" data-choice="latest" bindtap="resolveMemoryConflict">使用已保存照片</text><text data-field="photoFileIds" data-choice="mine" bindtap="resolveMemoryConflict">保留本页照片</text></view>
+      </view>
+      <view wx:if="{{memoryConflictReflection}}" class="memory-conflict">
+        <view>伙伴已保存的心得</view><view class="memory-remote-text">{{memoryRemoteReflection || '（已清空）'}}</view>
+        <view class="memory-conflict-actions"><text data-field="reflection" data-choice="latest" bindtap="resolveMemoryConflict">使用已保存心得</text><text data-field="reflection" data-choice="mine" bindtap="resolveMemoryConflict">保留本页心得</text></view>
+      </view>
+      <view wx:if="{{memoryDirty && !recordMode}}" class="memory-save-row">
+        <button class="memory-cancel" disabled="{{memorySaving || pendingMemoryPayload}}" bindtap="cancelMemory">取消编辑</button>
+        <button disabled="{{memorySaving || memoryConflictPhotos || memoryConflictReflection || (status !== 'completed' && !pendingMemoryPayload)}}" bindtap="saveMemory">{{memorySaving ? '正在保存…' : pendingMemoryPayload ? '核对并重试' : '保存记录'}}</button>
+      </view>
+    </view>
+
+    <view class="section-head meal-list-head"><view class="meal-list-title"><text class="section-title">{{recordMode ? '实际吃过的菜' : '选好的菜'}}</text><text class="count">{{meal ? meal.items.length : 0}}</text></view><view wx:if="{{!recordMode && status !== 'completed' && status !== 'cancelled'}}" class="head-actions"><view class="head-action" aria-role="button" bindtap="chooseRecipe"><text class="long">＋继续选菜</text><text class="short">＋选菜</text></view><view class="head-action" aria-role="button" bindtap="chooseWish"><text class="long">看看心愿 ›</text><text class="short">心愿 ›</text></view></view></view>
+    <view wx:if="{{recordMode}}" class="actual-dishes">
+      <view wx:for="{{meal.items}}" wx:key="id" class="actual-dish"><text>{{item.name}}<text wx:if="{{item.state !== 'eaten' && item.state !== 'cooked'}}" class="hint"> · 未做</text></text><text data-id="{{item.id}}" bindtap="removeActualDish">移出</text></view>
+      <view class="actual-add"><button class="btn-light" disabled="{{saving || pendingEatingPayload}}" bindtap="addActualDish">＋ 添加一道实际吃过的菜</button></view>
+      <view wx:if="{{!meal.items.length}}" class="hint">{{meal.id ? '还没记下吃过的菜' : '记下吃过的菜，不增加制作次数'}}</view>
+    </view>
+    <view wx:elif="{{!meal || !meal.items.length}}" class="empty meal-empty"><view class="empty-title">还没选菜</view><view>从菜单或心愿单挑一道吧</view><button class="btn-light choose-first" bindtap="chooseRecipe">去挑菜</button></view>
+    <view wx:else class="meal-list">
+      <view class="meal-swipe" wx:for="{{meal.items}}" wx:key="id">
+        <view wx:if="{{openId === item.id && (status === 'draft' || status === 'confirmed')}}" class="meal-remove" aria-role="button" aria-label="移出饭单" data-id="{{item.id}}" catchtap="remove">移出饭单</view>
+        <view class="meal-item {{openId === item.id ? 'open' : ''}}" data-id="{{item.id}}" bindtouchstart="swipeStart" bindtouchend="swipeEnd">
+          <image wx:if="{{item.coverUrl && !item.coverError}}" class="meal-thumb" src="{{item.coverUrl}}" mode="aspectFill" lazy-load="true" data-kind="cover" data-id="{{item.id}}" data-url="{{item.coverUrl}}" binderror="imageError" />
+          <view wx:elif="{{item.coverError}}" class="meal-thumb meal-image-retry" aria-role="button" catchtap="retryPhotos">{{photosLoading ? '重试中…' : '照片未加载\n点此重试'}}</view>
+          <view wx:else class="meal-thumb meal-thumb-empty">🍽</view>
+          <view class="meal-item-body"><view class="item-title">{{item.name}}</view><view class="meal-item-meta">{{item.wishId ? '来自心愿' : '来自菜单'}}<text wx:if="{{status === 'completed' && item.state !== 'cooked'}}"> · 未做</text></view></view>
+          <view wx:if="{{status === 'confirmed'}}" class="meal-check-hit" aria-role="checkbox" aria-label="{{item.name}}是否做了" aria-checked="{{item.state === 'cooked'}}" data-id="{{item.id}}" catchtap="mark"><view class="meal-check {{item.state === 'cooked' ? 'checked' : ''}}"><text wx:if="{{item.state === 'cooked'}}">✓</text></view></view>
+          <view wx:elif="{{status === 'completed' && item.state === 'cooked'}}" class="meal-photo-hit" data-id="{{item.id}}" catchtap="photo"><image wx:if="{{item.photoUrl && !item.photoError}}" class="meal-photo-preview" src="{{item.photoUrl}}" mode="aspectFill" data-kind="record" data-id="{{item.id}}" data-url="{{item.photoUrl}}" binderror="imageError" /><view wx:elif="{{item.photoError || meal.recordPhotosError}}" class="meal-photo-retry">{{photosLoading ? '重试中…' : '照片未加载 · 重试'}}</view><view wx:else class="meal-photo-link"><text class="camera-icon">📷</text><text>记录一下吧</text></view></view>
+          <view wx:elif="{{status === 'completed' || status === 'cancelled'}}" class="meal-again" data-id="{{item.id}}" catchtap="addAgain">再选 ›</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!recordMode && status === 'completed'}}" class="finished">这顿饭记下来啦，照片和心得慢慢补</view>
+    <view wx:if="{{status === 'cancelled'}}" class="finished">这顿饭已取消</view>
+    <view wx:if="{{recordMode && meal}}" class="meal-actions"><view class="meal-main-actions"><button class="meal-save" aria-disabled="{{saving}}" hover-class="meal-save-pressed" hover-start-time="0" hover-stay-time="80" bindtap="cancelRecordEdit">取消编辑</button><button class="meal-primary" aria-disabled="{{saving || memorySaving}}" hover-class="meal-primary-pressed" hover-start-time="0" hover-stay-time="80" bindtap="saveEating">{{saving ? '正在保存…' : openSaved ? '打开已保存记录' : pendingEatingPayload ? '核对并重试' : '保存记录'}}</button></view></view>
+    <view wx:elif="{{meal}}" class="meal-actions">
+      <view wx:if="{{status === 'draft' || status === 'confirmed'}}" class="meal-main-actions"><button class="meal-save {{savingAction === 'save' ? 'is-saving' : ''}}" hover-class="meal-save-pressed" hover-start-time="0" hover-stay-time="80" aria-disabled="{{saving}}" bindtap="saveCurrent">保存修改</button><button wx:if="{{status === 'draft'}}" class="meal-primary {{savingAction === 'confirm' ? 'is-saving' : ''}}" hover-class="meal-primary-pressed" hover-start-time="0" hover-stay-time="80" aria-disabled="{{saving}}" bindtap="confirm">确认菜单</button><button wx:else class="meal-primary {{savingAction === 'complete' ? 'is-saving' : ''}}" hover-class="meal-primary-pressed" hover-start-time="0" hover-stay-time="80" aria-disabled="{{saving}}" bindtap="complete">完成这顿饭</button></view>
+      <view class="meal-secondary-actions"><view wx:if="{{status === 'confirmed'}}" class="meal-secondary meal-unconfirm" aria-role="button" bindtap="unconfirm">撤回确认</view><view wx:if="{{status === 'draft' || status === 'confirmed'}}" class="meal-secondary meal-cancel" aria-role="button" bindtap="cancel">取消这顿饭</view><view wx:if="{{status === 'completed' || status === 'cancelled'}}" class="meal-secondary" aria-role="button" bindtap="reopen">{{status === 'completed' ? '撤销完成' : '恢复这顿饭'}}</view></view>
+    </view>
+  </block>
+</view>
+
+<view wx:if="{{confirmationVisible}}" class="confirm-mask" catchtouchmove="stopConfirmationScroll"><view wx:for="{{confirmationParticles}}" wx:key="id" class="confetti" style="left:{{item.left}}%;background:{{item.color}};--drift:{{item.drift}}px;animation-delay:{{item.delay}}ms;"></view><view class="confirm-sheet"><view class="confirm-close" aria-role="button" aria-label="关闭确认提示" bindtap="closeConfirmation">×</view><view class="confirm-title">{{title}}，菜单确认好啦</view><view class="confirm-copy">准备好，就一起开饭吧<text>饭单也在记录页的一起吃饭里</text></view><button class="confirm-view" bindtap="viewConfirmed">去记录查看饭单 ›</button></view></view>
+
+<view wx:if="{{actualSource}}" class="actual-mask" catchtouchmove="stopActualScroll" bindtap="closeActualSource">
+  <view class="actual-sheet" catchtap="stopActualScroll">
+    <view class="actual-sheet-head"><text>{{actualSource === 'recipes' ? '从菜单导入' : actualSource === 'wishes' ? '从心愿单导入' : '自定义新增'}}</text><view bindtap="closeActualSource" aria-role="button">×</view></view>
+    <block wx:if="{{actualSource === 'custom'}}"><input class="input soft-input" placeholder="这道菜叫什么？" maxlength="80" value="{{newDishName}}" bindinput="onNewDish" bindconfirm="addCustomActual" /><view class="hint">保存时会收进菜单，已有同名菜或心愿就直接选用</view><button class="btn" bindtap="addCustomActual">加入这顿饭</button></block>
+    <scroll-view wx:else scroll-y class="actual-options"><view class="hint">只记录吃过的菜，制作次数和心愿状态不变</view><view wx:for="{{actualChoices}}" wx:key="id" class="actual-option" aria-role="button" data-id="{{item.id}}" bindtap="selectActualDish">{{item.name}}<text>＋</text></view><view wx:if="{{actualError}}" class="error" bindtap="loadActualChoices">{{actualError}} · 点此重试</view><view wx:elif="{{actualLoading}}" class="hint">正在加载菜品…</view><view wx:elif="{{!actualChoices.length}}" class="hint">没有可选的菜，试试自定义新增</view><view wx:if="{{actualMore && !actualLoading}}" class="actual-more" bindtap="loadActualChoices">继续查看</view></scroll-view>
+  </view>
+</view>

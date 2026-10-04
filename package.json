@@ -1,0 +1,12 @@
+{
+  "name": "private-kitchen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A shared private kitchen WeChat mini program",
+  "scripts": {
+    "test": "node scripts/test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

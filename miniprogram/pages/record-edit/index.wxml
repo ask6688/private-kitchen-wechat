@@ -1,0 +1,45 @@
+<view class="page record-edit cooking-form">
+  <view class="cooking-heading">{{dishContext ? "这道菜的本餐记录" : id ? "这次的下厨记录" : "做已有的菜"}}</view>
+  <view wx:if="{{error}}" class="error" bindtap="retry">{{error}} · 点此重试</view>
+  <view wx:if="{{loading}}" class="empty">正在准备记录…</view>
+  <view wx:elif="{{!error && !dishContext && !id && !choices.length && !recipeId && !wishId}}" class="empty">
+    <view class="empty-title">还没有可选择的菜</view><view>回到做一道菜，试试第一次做新菜</view>
+  </view>
+  <block wx:elif="{{!error}}">
+    <view class="record-fields {{saving || memorySaving || pendingMemoryPayload || pendingRecordPayload || savedRecordId ? 'is-locked' : ''}}">
+      <view class="field source-field name-field">
+        <text class="label">{{dishContext ? "本餐菜名" : "菜品 / 心愿 *"}}</text>
+        <view wx:if="{{dishContext || id && !recipeId && !wishId && dishSnapshot}}" class="dish-name">{{sourceName}}<text wx:if="{{dishContext && dishRecipeId}}" class="dish-recipe-link" bindtap="viewDishRecipe">原菜谱 ›</text></view>
+        <picker wx:else class="record-picker" mode="selector" range="{{choices}}" range-key="label" disabled="{{saving || !!pendingRecordPayload || !!savedRecordId}}" bindchange="source"><view class="input select name-control"><text class="select-text">{{sourceName || '选择菜品或心愿'}}</text></view></picker>
+      </view>
+      <view class="field photo-field"><text class="label">{{dishContext ? "这道菜的照片" : "这次的照片"}}</text><view wx:if="{{photoDraftNotice}}" class="hint photo-draft-notice">{{photoDraftNotice}}<text wx:if="{{canRestorePhotos}}" class="restore-photos" aria-role="button" bindtap="restoreSavedPhotos">恢复已保存照片</text></view><view class="photo-grid">
+        <view class="photo-item" wx:for="{{photos}}" wx:key="key" wx:if="{{!dishContext || index === 0}}">
+          <image wx:if="{{item.url && item.state !== 'error'}}" class="photo-preview" src="{{item.url}}" data-key="{{item.key}}" data-url="{{item.url}}" bindload="photoLoaded" binderror="photoFailed" bindtap="previewPhoto" mode="aspectFill" />
+          <view wx:if="{{item.state === 'loading'}}" class="photo-state">加载中…</view>
+          <view wx:elif="{{item.state === 'error'}}" class="photo-state photo-error" aria-role="button" data-key="{{item.key}}" catchtap="retryPhoto">{{item.fileId ? '加载失败' : '照片已失效'}}<text>{{item.fileId ? '点此重试' : '请移除后重选'}}</text></view>
+          <view class="photo-remove" aria-role="button" aria-label="移除照片" data-index="{{index}}" catchtap="removePhoto"><text>×</text></view>
+        </view>
+        <view class="photo-add" aria-role="button" bindtap="photo"><view class="photo-add-content"><text class="photo-add-icon">＋</text><text>{{dishContext && photos.length ? "更换照片" : "添加照片"}}</text></view></view>
+      </view><view class="hint">{{dishContext ? (photos.length > 1 ? "旧照片只展示首张，更换或移除后记得保存" : "留一张本餐照片，保存后生效，菜品封面不变") : "保存时上传，之后也能补照片"}}</view></view>
+      <view wx:if="{{!dishContext}}" class="field date-field"><text class="label">日期</text><picker class="record-picker" mode="date" value="{{date}}" disabled="{{saving || !!pendingRecordPayload || !!savedRecordId}}" bindchange="onDate"><view class="date-value">{{date}}<text>⌄</text></view></picker></view>
+      <view class="field"><text class="label">{{dishContext ? "这道菜的心得" : "这次的心得"}}</text><textarea class="textarea cooking-note" placeholder="{{dishContext ? '写写这道菜的味道，或想记住的小细节…' : '比如火候、味道、一起做饭时的小事…'}}" maxlength="4000" value="{{dishContext ? reflection : note}}" disabled="{{memorySaving || !!pendingMemoryPayload || saving || !!pendingRecordPayload || !!savedRecordId}}" bindinput="onNote" /></view>
+      <view wx:if="{{dishSnapshot}}" class="snapshot-group">
+        <view class="snapshot-heading" bindtap="toggleRecipeInfo"><text>菜谱信息</text><text class="hint">{{showRecipeInfo ? '收起 −' : '展开 ＋'}}</text></view>
+        <view wx:if="{{showRecipeInfo}}" class="snapshot-content">
+          <view wx:if="{{dishSnapshot.category || dishSnapshot.tags.length}}" class="snapshot-tags"><text wx:if="{{dishSnapshot.category}}">{{dishSnapshot.category}}</text><text wx:for="{{dishSnapshot.tags}}" wx:key="*this">{{item}}</text></view>
+          <view wx:if="{{dishSnapshot.description}}" class="snapshot-text">{{dishSnapshot.description}}</view>
+          <view wx:if="{{dishSnapshot.ingredients}}" class="snapshot-section"><text class="label">食材</text><text class="snapshot-text" selectable>{{dishSnapshot.ingredients}}</text></view>
+          <view wx:if="{{dishSnapshot.steps}}" class="snapshot-section"><text class="label">做法</text><text class="snapshot-text" selectable>{{dishSnapshot.steps}}</text></view>
+          <view wx:if="{{dishSnapshot.externalUrl}}" class="snapshot-section"><text class="label">参考链接</text><text class="snapshot-text" selectable>{{dishSnapshot.externalUrl}}</text></view>
+          <view wx:if="{{!dishSnapshot.category && !dishSnapshot.tags.length && !dishSnapshot.description && !dishSnapshot.ingredients && !dishSnapshot.steps && !dishSnapshot.externalUrl}}" class="hint">这次没有填写菜谱信息</view>
+        </view>
+      </view>
+      <view wx:if="{{wishId && !id}}" class="card card-pad line cooking-option"><view><view class="label">同时实现这道心愿</view><view class="hint">保存记录后，将心愿标记为已实现</view></view><switch color="#466653" checked="{{finishWish}}" disabled="{{saving || !!pendingRecordPayload || !!savedRecordId}}" bindchange="onFinishWish" /></view>
+    </view>
+    <view wx:if="{{dishContext && memoryNotice}}" class="hint">{{memoryNotice}}</view>
+    <view wx:if="{{dishContext && memoryConflictPhotos}}" class="hint">伙伴的照片共 {{memoryRemotePhotoCount}} 张<view class="conflict-options"><text bindtap="previewMemoryRemote">查看伙伴照片</text><text data-field="photoFileIds" data-choice="mine" bindtap="resolveMemoryConflict">保留我的照片</text><text data-field="photoFileIds" data-choice="latest" bindtap="resolveMemoryConflict">用伙伴的照片</text></view></view>
+    <view wx:if="{{dishContext && memoryConflictReflection}}" class="hint">伙伴的心得：{{memoryRemoteReflection || '未填写'}}<view class="conflict-options"><text data-field="reflection" data-choice="mine" bindtap="resolveMemoryConflict">保留我的心得</text><text data-field="reflection" data-choice="latest" bindtap="resolveMemoryConflict">用伙伴的心得</text></view></view>
+    <view wx:if="{{dishContext}}" class="fixed-bottom dish-edit-actions"><button class="btn ghost" disabled="{{memorySaving}}" bindtap="cancelDishMemory">取消编辑</button><button class="btn" disabled="{{memorySaving}}" bindtap="save">{{pendingMemoryPayload ? '核对并重试' : '保存记录'}}</button></view>
+    <view wx:else class="fixed-bottom"><view wx:if="{{pendingRecordPayload && !saving}}" class="pending-hint">保存结果待确认，请点核对并重试</view><button class="btn" disabled="{{saving}}" bindtap="save">{{savedRecordId ? '记录已保存 · 返回' : pendingRecordPayload ? '核对并重试' : '保存记录'}}</button></view>
+  </block>
+</view>

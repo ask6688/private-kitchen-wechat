@@ -1,0 +1,35 @@
+<view class="page wish-page">
+  <view class="wish-header">
+    <view class="wish-title">我们的心愿</view>
+    <button class="wish-add" bindtap="create"><text>＋ 添加</text></button>
+  </view>
+  <view wx:if="{{!loading && !error}}" class="wish-count"><text>待实现</text><text>{{shown.length}} 道</text></view>
+  <view wx:if="{{error}}" class="error" bindtap="retry">{{error}} · 点此重试</view>
+  <view wx:elif="{{!shown.length && !loading}}" class="empty"><view class="empty-title">还没有想吃的菜</view><view>把想吃的菜收在这里</view></view>
+  <view wx:else class="wish-list">
+    <view class="wish-item" wx:for="{{shown}}" wx:key="id">
+      <view class="wish-swipe">
+        <view wx:if="{{openId === item.id}}" class="wish-delete" aria-role="button" aria-label="删除" data-id="{{item.id}}" catchtap="remove"><text>删除</text></view>
+        <view class="wish-row {{openId === item.id ? 'open' : ''}}" data-id="{{item.id}}" bindtouchstart="swipeStart" bindtouchend="swipeEnd">
+          <view class="wish-main" data-id="{{item.id}}" bindtap="rowTap">
+            <image wx:if="{{item.coverUrl && !failedCovers[item.id]}}" class="wish-photo" src="{{item.coverUrl}}" mode="aspectFill" data-id="{{item.id}}" binderror="coverError" />
+            <view wx:else class="wish-photo placeholder">待补照片</view>
+            <view class="wish-copy">
+              <view class="wish-name">{{item.name}}</view>
+              <view class="wish-meta">{{item.category}} · {{item.selected ? (fromMeal ? '已在这顿饭' : '今天想吃') : '待实现'}}</view>
+              <view class="wish-actions">
+                <button class="wish-choice {{item.recipe.archivedAt && !item.selected ? 'is-disabled' : ''}}" disabled="{{saving || !!item.recipe.archivedAt && !item.selected}}" data-id="{{item.id}}" catchtap="addToMeal">{{item.recipe.archivedAt && !item.selected ? '已归档' : (item.selected ? '取消选择' : (fromMeal ? '＋ 加入饭单' : '＋ 今天想吃'))}}</button>
+                <button class="wish-complete" disabled="{{loading || saving}}" data-id="{{item.id}}" catchtap="complete">实现</button>
+              </view>
+            </view>
+            <view class="wish-more-slot"><button wx:if="{{!item.recipe.archivedAt}}" class="wish-more" data-id="{{item.id}}" catchtap="more" aria-label="更多操作">···</button></view>
+          </view>
+          <view wx:if="{{item.recipe.archivedAt}}" class="archived-hint" data-id="{{item.id}}" bindtap="detail">已归档 · 打开详情可恢复</view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{loading}}" class="hint loading">正在翻看心愿…</view>
+  <view wx:if="{{fromMeal && !loading && !error}}" class="selection-note" bindtap="returnMeal">已选 {{selectedCount}} 道菜 · 回到这次饭单 →</view>
+  <view wx:elif="{{selectedCount && !loading}}" class="selection-note" bindtap="menu">已选 {{selectedCount}} 道菜 · 回菜单查看饭单 →</view>
+</view>

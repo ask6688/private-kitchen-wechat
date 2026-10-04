@@ -1,0 +1,1 @@
+{ "desc": "私人厨房，仅成员访问", "rules": [{ "action": "disallow", "page": "*" }] }

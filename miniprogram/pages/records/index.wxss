@@ -1,0 +1,125 @@
+.records-page { padding: 24rpx 30rpx calc(40rpx + env(safe-area-inset-bottom)); }
+.record-entries { display:flex;gap:20rpx;padding:0;margin:8rpx 0 38rpx; }
+.record-entry { flex:1;min-width:0;padding:24rpx;border-radius:20rpx;background:#E9EEE5; }
+.record-entry + .record-entry { background:#EFEAE0; }
+.entry-title { display: flex; align-items: center; justify-content: space-between; color: #466653; font-size:34rpx;line-height:1.35; font-weight: 600; }
+.entry-arrow { font-size: 34rpx; font-weight: 400; color: #829185; }
+.entry-description { margin-top:8rpx;font-size:24rpx;line-height:1.5;color:#69736B; }
+.records-head { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-bottom: 10rpx; min-height: 64rpx; }
+.records-title { flex-shrink: 0; font-size: 32rpx; font-weight: 600; }
+.record-action { width: auto; flex: 0 0 auto; padding: 12rpx 0; margin: 0; background: transparent; color: #466653; font-size: 25rpx; line-height: 1.4; border-radius: 0; }
+.record-action::after { border: 0; }
+.records-head button.record-action { width: auto; min-width: 0; margin: 0; }
+.record-action.is-disabled { color: #8A938B; }
+.record-menu-backdrop { position: fixed; inset: 0; z-index: 40; }
+.new-record-entry { position: relative; flex: 0 0 auto; z-index: 41; }
+.record-methods { position: absolute; top: calc(100% + 8rpx); right: 0; width: 324rpx; max-width: calc(100vw - 60rpx); padding: 8rpx; box-sizing: border-box; border: 1rpx solid #DCE3D8; border-radius: 16rpx; background: #F5F6EF; box-shadow: 0 6rpx 20rpx rgba(55, 76, 60, .07); }
+.record-method { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; min-height: 88rpx; padding: 0 20rpx; box-sizing: border-box; border-radius: 10rpx; color: #466653; font-size: 27rpx; white-space: nowrap; }
+.record-method-pressed { background: #E9EEE4; }
+@media (hover: hover) { .record-method:hover { background: #E9EEE4; } }
+.method-arrow { color: #81907D; font-size: 32rpx; }
+.timeline-item { position: relative; z-index:1; padding: 28rpx 0; border-bottom: 1rpx solid #DDDCD3; overflow: hidden; background:#F7F4EE; transition:transform .18s ease; }
+.timeline-item.record { display: flex; align-items: center; gap: 20rpx; }
+.cooking-photo { position: relative; overflow: hidden; flex-shrink: 0; width: 170rpx; height: 170rpx; border-radius: 12rpx; background: #E8EDE7; }
+.photo-tile, .record-image { position: absolute; inset: 0; width: 100%; height: 100%; }
+.photo-tile { background: #E8EDE7; }
+.photo-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6rpx; padding: 10rpx; box-sizing: border-box; text-align: center; color: #74816F; background: #E8EDE7; font-size: 22rpx; line-height: 1.45; }
+.photo-retry { color: #466653; }
+.photo-retry text:last-child { font-size: 21rpx; }
+.timeline-copy { flex: 1; min-width: 0; }
+.record-meta { color: #69736B; font-size: 23rpx; line-height: 1.5; }
+.timeline-title { margin-top: 8rpx; font-size: 32rpx; line-height: 1.4; font-weight: 600; overflow-wrap: break-word; word-break: break-all; }
+.cooking-note { color: #69736B; font-size: 25rpx; line-height: 1.5; margin-top: 8rpx; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; word-break: break-all; }
+.row-arrow { flex: 0 0 auto; color: #829185; font-size: 34rpx; line-height: 1; }
+.meal-record-top { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.meal-record-top .record-meta { flex: 1; min-width: 0; }
+.record-status { flex-shrink: 0; font-size: 22rpx; padding: 5rpx 12rpx; border-radius: 6rpx; color: #766C51; background: #EEEADF; }
+.record-status.confirmed { color: #466653; background: #E4EBE4; }
+.record-status.completed { color: #69736B; background: #EBECE6; }
+.meal-record-title { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.meal-record-title .timeline-title { min-width: 0; flex: 1; }
+.meal-dishes { margin-top: 10rpx; font-size: 27rpx; line-height: 1.6; color: #59655B; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; word-break: break-all; }
+.meal-photos { display: flex; gap: 12rpx; margin-top: 18rpx; }
+.meal-record-photo { position: relative; overflow: hidden; width: 152rpx; height: 128rpx; border-radius: 10rpx; background: #E8EDE7; }
+.records-empty { padding: 72rpx 16rpx; font-size: 26rpx; }
+.records-loading { text-align: center; padding: 40rpx 0; }
+.load-more { margin: 24rpx auto 0; }
+@media (max-width: 350px) { .entry-title { font-size: 32rpx; } .record-action { font-size: 24rpx; } .cooking-photo { width: 150rpx; height: 150rpx; } }
+
+.records-home .entry-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14rpx; }
+.records-home .entry-description { margin-top: 8rpx; font-size: 24rpx; line-height: 1.5; color: #6B766C; }
+.records-home .entry-arrow { color: #6D806E; }
+.records-home .entry-icon { position: relative; width: 48rpx; height: 48rpx; color: #466653; }
+.records-home .pot-lid { position: absolute; left: 3rpx; top: 14rpx; width: 42rpx; height: 4rpx; border-radius: 4rpx; background: currentColor; }
+.records-home .pot-lid::before { content: ''; position: absolute; left: 17rpx; top: -7rpx; width: 8rpx; height: 7rpx; border: 3rpx solid currentColor; border-bottom: 0; border-radius: 5rpx 5rpx 0 0; }
+.records-home .pot-body { position: absolute; left: 8rpx; top: 22rpx; width: 32rpx; height: 22rpx; border: 3rpx solid currentColor; border-top: 0; border-radius: 0 0 9rpx 9rpx; }
+.records-home .pot-body::before, .records-home .pot-body::after { content: ''; position: absolute; top: 1rpx; width: 6rpx; height: 3rpx; border-radius: 3rpx; background: currentColor; }
+.records-home .pot-body::before { left: -8rpx; }
+.records-home .pot-body::after { right: -8rpx; }
+.records-home .plate-ring { position: absolute; left: 11rpx; top: 7rpx; width: 28rpx; height: 34rpx; border: 3rpx solid currentColor; border-radius: 50%; }
+.records-home .plate-ring::after { content: ''; position: absolute; inset: 5rpx; border: 2rpx solid currentColor; border-radius: 50%; }
+.records-home .fork-line, .records-home .spoon-line { position: absolute; top: 10rpx; height: 31rpx; width: 3rpx; background: currentColor; border-radius: 3rpx; }
+.records-home .fork-line { left: 2rpx; }
+.records-home .fork-line::before { content: ''; position: absolute; top: -1rpx; left: -3rpx; width: 9rpx; height: 11rpx; border: 2rpx solid currentColor; border-top: 0; border-radius: 0 0 5rpx 5rpx; }
+.records-home .spoon-line { right: 1rpx; }
+.records-home .spoon-line::before { content: ''; position: absolute; left: -3rpx; top: -2rpx; width: 9rpx; height: 14rpx; border: 2rpx solid currentColor; border-radius: 50%; background: #EFEAE0; }
+.records-home .records-head { margin-bottom: 22rpx; min-height: 48rpx; }
+.records-home .records-title { font-size: 31rpx; }
+.records-home .records-list { display: flex; flex-direction: column; gap: 36rpx; }
+.records-home .timeline-item { border: 0; border-radius: 18rpx; padding: 0; background: #FFF; }
+.records-home .timeline-item.record { display: block; }
+.records-home .record-photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6rpx; width: 100%; overflow: hidden; }
+.records-home .record-photo-cell { position: relative; min-width: 0; padding-top: 100%; }
+.records-home .photo-count-1 { grid-template-columns: 1fr; }
+.records-home .photo-count-1 .record-photo-cell { padding-top: 75%; }
+.records-home .photo-count-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.records-home .photo-more { position: absolute; right: 12rpx; bottom: 12rpx; padding: 4rpx 10rpx; border-radius: 6rpx; color: #FFF; background: rgba(43, 55, 45, .68); font-size: 24rpx; line-height: 1.5; pointer-events: none; }
+.records-home .timeline-copy { padding: 24rpx 58rpx 28rpx 28rpx; }
+.records-home .record-meta { font-size: 23rpx; color: #7A8077; }
+.records-home .timeline-title { font-size: 36rpx; line-height: 1.45; margin-top: 8rpx; }
+.records-home .cooking-note { font-size: 28rpx; line-height: 1.7; margin-top: 12rpx; color: #5B665C; }
+.records-home .record > .row-arrow { position: absolute; right: 26rpx; bottom: 32rpx; }
+.records-home .timeline-item.meal { display: flex; flex-direction: column; padding: 26rpx 28rpx; background: #ECEFE7; }
+.records-home .meal.has-photo { background: #FFF; padding: 0; }
+.records-home .meal.has-photo .meal-record-top { padding: 24rpx 28rpx 0; }
+.records-home .meal.has-photo .meal-record-title { padding: 0 28rpx; }
+.records-home .meal.has-photo .meal-dishes { margin-bottom: 28rpx; padding: 0 28rpx; }
+.records-home .meal-dishes { font-size: 28rpx; line-height: 1.65; margin-top: 12rpx; }
+.records-home .record-status { padding: 5rpx 12rpx; border-radius: 7rpx; }
+@media (max-width: 350px) {
+  .records-home .record-entries { gap: 16rpx; }
+  .records-home .record-entry, .records-home .record-entry + .record-entry { padding: 22rpx; }
+  .records-home .entry-title { font-size: 33rpx; }
+}
+
+.focused-meal { background:#EBEFE4;border-radius:14rpx;padding-left:18rpx;padding-right:18rpx; }
+.confirmed-source { color:#637B58;font-size:22rpx;margin:6rpx 0 10rpx; }
+.record-swipe { position:relative;overflow:hidden; }
+.records-home .record-swipe { border-radius:18rpx; }
+.timeline-item.is-open { transform:translateX(-156rpx); }
+.record-delete { position:absolute;top:0;right:0;bottom:0;width:156rpx;display:flex;align-items:center;justify-content:center;background:#A96454;color:#FFF7EA;font-size:25rpx;line-height:1.4; }
+.delete-actions button::after { border:0; }
+.record-delete-mask { position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:40rpx;background:rgba(30,43,34,.42);box-sizing:border-box; }
+.record-delete-dialog { width:100%;max-width:590rpx;padding:38rpx 30rpx 28rpx;box-sizing:border-box;background:#F6F4EB;border-radius:24rpx; }
+.delete-title { text-align:center;font-size:32rpx;color:#3F5542;font-weight:500; }
+.delete-copy { text-align:center;color:#7B8371;font-size:25rpx;line-height:1.7;margin:18rpx 0 28rpx;overflow-wrap:anywhere; }
+.delete-copy text { display:block;margin-top:10rpx;font-size:23rpx; }
+.delete-error { color:#A35F50;font-size:24rpx;line-height:1.6;margin:14rpx 0; }
+.delete-actions { display:flex;justify-content:flex-end;gap:18rpx; }
+.delete-actions button, .delete-actions button[disabled]:not([type]) { width:auto;margin:0;padding:18rpx 28rpx;line-height:1.4;border-radius:12rpx;background:transparent;color:#61775C;font-size:26rpx; }
+.delete-actions .delete-confirm, .delete-actions button.delete-confirm[disabled]:not([type]) { background:#E7DDD3;color:#994E3C; }
+.records-editing { padding-bottom: calc(150rpx + env(safe-area-inset-bottom)); }
+.selection-scope { margin: -4rpx 0 22rpx; color: #7A8077; font-size: 23rpx; }
+.record-swipe.is-editing { padding-right: 58rpx; border-radius: 0; }
+.record-swipe.is-selected .timeline-item { box-shadow: inset 0 0 0 2rpx #819881; }
+.record-select, .selection-circle { box-sizing: border-box; width: 38rpx; height: 38rpx; border: 2rpx solid #9EA99C; border-radius: 50%; background: #F7F4EE; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.record-select { position: absolute; right: 0; top: 28rpx; }
+.is-checked { background: #466653; border-color: #466653; }
+.selection-tick { width: 12rpx; height: 20rpx; margin-top: -5rpx; border: solid #FFF; border-width: 0 3rpx 3rpx 0; transform: rotate(45deg); }
+.batch-toolbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: 16rpx; padding: 18rpx 30rpx; background: #F7F4EE; border-top: 1rpx solid #DDDCD3; }
+.batch-toolbar button, .batch-toolbar button[disabled]:not([type]) { width: auto; margin: 0; padding: 16rpx 22rpx; font-size: 26rpx; line-height: 1.4; border-radius: 12rpx; }
+.batch-toolbar button::after { border: 0; }
+.batch-toolbar .select-all, .batch-toolbar .select-all[disabled]:not([type]) { display: flex; align-items: center; gap: 12rpx; padding-left: 0; color: #466653; background: transparent; }
+.batch-count { flex: 1; color: #7A8077; font-size: 23rpx; text-align: right; }
+.batch-toolbar .batch-delete { color: #FFF7EA; background: #A96454; }
+.batch-toolbar .batch-delete[disabled]:not([type]) { color: #F7F4EE; background: #BBA294; }

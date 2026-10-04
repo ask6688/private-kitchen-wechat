@@ -1,0 +1,31 @@
+<view class="detail-nav" style="padding-top:{{topInset}}px;"><view class="detail-back" bindtap="back" aria-role="button" aria-label="返回">‹</view><text>{{menuView.title || '这顿饭'}}</text></view>
+<view class="preview-page">
+  <view wx:if="{{loading}}" class="pending">正在打开这顿饭…</view>
+  <view wx:elif="{{error}}" class="error" bindtap="retry">{{error}} · 点此重试</view>
+  <block wx:elif="{{meal}}">
+
+    <view wx:if="{{renderError}}" class="error" bindtap="retryMenu">{{renderError}} · 重试</view>
+    <view class="paper interactive-menu">
+      <image wx:if="{{cornerTop}}" class="corner-top" src="{{cornerTop}}" mode="aspectFit" />
+      <view class="menu-heading"><view class="menu-wordmark">Menu</view><view class="menu-name">{{menuView.title}}</view><view class="menu-meta">{{menuView.date}} · {{menuView.diners}} 人</view><view class="menu-state">{{menuView.statusLabel}}</view></view>
+<view wx:for="{{dishGroups}}" wx:for-item="group" wx:key="name" class="dish-group"><view class="dish-category">{{group.name}}</view><view wx:for="{{group.items}}" wx:key="id" class="dish-memory-row">
+      <view wx:if="{{item.displayPhotos.length}}" class="dish-thumb"><image wx:if="{{item.displayPhotos[0].url && item.displayPhotos[0].state !== 'error'}}" src="{{item.displayPhotos[0].url}}" mode="aspectFill" data-id="{{item.id}}" data-key="{{item.displayPhotos[0].key}}" data-url="{{item.displayPhotos[0].url}}" bindload="dishPhotoLoaded" binderror="dishPhotoFailed" bindtap="previewDishPhoto" /><view wx:if="{{item.displayPhotos[0].state === 'loading'}}" class="photo-status">加载中</view><view wx:elif="{{item.displayPhotos[0].state === 'error'}}" class="photo-status" bindtap="retryDishPhotos">重试</view></view>
+      <view class="dish-memory-copy"><view class="dish-memory-name">{{item.name}}</view><view wx:if="{{item.reflection}}" class="dish-reflection">{{item.reflection}}</view><view wx:elif="{{!item.hasMemory}}" class="dish-empty">照片和心得，随时补</view></view><button class="dish-memory-action" data-id="{{item.id}}" bindtap="dish">{{item.hasMemory ? '编辑记录 ›' : '添点记录 ›'}}</button>
+    </view></view>
+      <view wx:if="{{!dishGroups.length}}" class="menu-empty">这顿饭还没有菜品</view>
+      <image wx:if="{{cornerTop}}" class="corner-accent" src="{{cornerTop}}" mode="aspectFit" />
+      <view class="menu-footer">好好吃饭 · 慢慢记住</view>
+      <image wx:if="{{cornerBottom}}" class="corner-bottom" src="{{cornerBottom}}" mode="aspectFit" />
+    </view>
+    <view class="menu-preview-link" bindtap="preview"><text>查看完整 Menu</text><view class="menu-chevron" /></view>
+    <view wx:if="{{meal.note}}" class="arrangement"><text>当时的安排</text><view>{{meal.note}}</view></view>
+    <view class="detail-actions"><button wx:if="{{meal.status === 'completed'}}" class="quiet-action" bindtap="editInfo">编辑记录</button></view>
+  </block>
+</view>
+<canvas id="paperCanvas" type="2d" class="export-canvas" style="width:600px;height:{{menuHeight}}px"></canvas>
+<view wx:if="{{overlay}}" class="celebration-mask {{closing ? 'is-closing' : ''}}" catchtouchmove="noop">
+  <view class="confetti" wx:for="{{particles}}" wx:key="id" style="left:{{item.left}}%;background:{{item.color}};--drift:{{item.drift}}px;animation-delay:{{item.delay}}ms;"></view>
+  <view class="celebration"><view class="celebration-toolbar"><view class="close" bindtap="closeOverlay" aria-role="button" aria-label="关闭完成蒙版">×</view></view><view class="success-title">这一顿，收进回忆啦</view><view class="success-subtitle">添张照片，记住这一顿</view>
+    <scroll-view scroll-y class="poster-scroll"><image wx:if="{{image}}" class="poster" src="{{image}}" mode="widthFix" bindtap="preview" /><view wx:elif="{{renderError}}" class="pending" bindtap="retryMenu">记录已保存 · Menu 生成失败，点此重试</view><view wx:else class="pending">Menu 正在展开…</view></scroll-view><view wx:if="{{menuHeight > 800}}" class="scroll-note">上下滑动，看看完整菜单</view><button class="see-meal" bindtap="addCompletionMemory">去添点记录</button>
+  </view>
+</view>
